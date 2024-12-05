@@ -15,19 +15,19 @@ private:
     void handleStencilProgram();
 
 protected:
-    cocos2d::Vec4                   m_colorTransformMult;
-    cocos2d::Vec4                   m_colorTransformOffsets;
-    cocos2d::Mat4                   m_colorMatrixIdentity1;
-    cocos2d::Vec4                   m_colorMatrixIdentity2;
-    GAFColorMatrixFilterData*       m_colorMatrixFilterData;
-    GAFGlowFilterData*              m_glowFilterData;
-    GAFBlurFilterData*              m_blurFilterData;
-    cocos2d::Texture2D *            m_initialTexture;
-    cocos2d::Rect                   m_initialTextureRect;
-    cocos2d::GLProgramState*        m_programBase;
-    cocos2d::GLProgramState*        m_programNoCtx;
-    mutable bool                    m_ctxDirty;
-    bool                            m_isStencil;
+    ax::Vec4                    m_colorTransformMult;
+    ax::Vec4                    m_colorTransformOffsets;
+    ax::Mat4                    m_colorMatrixIdentity1;
+    ax::Vec4                    m_colorMatrixIdentity2;
+    GAFColorMatrixFilterData*   m_colorMatrixFilterData;
+    GAFGlowFilterData*          m_glowFilterData;
+    GAFBlurFilterData*          m_blurFilterData;
+    ax::Texture2D *             m_initialTexture;
+    ax::Rect                    m_initialTextureRect;
+    ax::ProgramState*           m_programBase;
+    ax::ProgramState*           m_programNoCtx;
+    mutable bool                m_ctxDirty;
+    bool                        m_isStencil;
 
     void updateTextureWithEffects();
     virtual uint32_t setUniforms() override;
@@ -35,9 +35,9 @@ protected:
 public:
 
     GAFMovieClip();
-    virtual ~GAFMovieClip();
+    virtual ~GAFMovieClip() override;
 
-    virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated) override;
+    virtual bool initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect, bool rotated) override;
 
     void setColorTransform(const GLfloat * mults, const GLfloat * offsets);
     void setColorTransform(const GLfloat * colorTransform);
@@ -46,14 +46,16 @@ public:
     void setGlowFilterData(GAFGlowFilterData* data);
     void setBlurFilterData(GAFBlurFilterData* data);
 
-    cocos2d::Texture2D*    getInitialTexture() const;
-    const cocos2d::Rect&   getInitialTextureRect() const;
+    ax::Texture2D*    getInitialTexture() const;
+    const ax::Rect&   getInitialTextureRect() const;
 
     bool            hasCtx();
     void            updateCtx();
-    void            setGLProgram(cocos2d::GLProgram *glProgram) override; // For monitoring external program changes
+    //void            setGLProgram(ax::Program *glProgram); // For monitoring external program changes
 
-    virtual void draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override;
+    bool setProgramState(ax::ProgramState* programState, bool ownPS) override;
+
+    virtual void draw(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags) override;
 };
 
 NS_GAF_END

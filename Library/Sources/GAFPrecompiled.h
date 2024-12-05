@@ -14,6 +14,6 @@
 #include <assert.h>
 #include <algorithm>
 
-#include <cocos2d.h>
+#include "axmol.h"
 
 #include "GAFMacros.h"

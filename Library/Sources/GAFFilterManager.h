@@ -9,7 +9,7 @@ class GAFBlurFilterData;
 class GAFGlowFilterData;
 class GAFDropShadowFilterData;
 
-class GAFFilterManager : public cocos2d::Ref
+class GAFFilterManager : public ax::Object
 {
     typedef std::map<unsigned int, GAFCachedTexture> Cache_t;
     typedef std::pair<unsigned int, GAFCachedTexture> CachePair_t;
@@ -19,7 +19,7 @@ public:
     static GAFFilterManager* getInstance();
     ~GAFFilterManager() {}
 
-    cocos2d::Texture2D* applyFilter(cocos2d::Sprite*, GAFFilterData*);
+    ax::Texture2D* applyFilter(ax::Sprite*, GAFFilterData*);
 
     void update(float dt);
 
@@ -28,16 +28,16 @@ public:
 private:
     GAFFilterManager() {}
 
-    unsigned int hash(cocos2d::Sprite*, GAFFilterData*);
+    unsigned int hash(ax::Sprite*, GAFFilterData*);
     bool hasTexture(unsigned int);
-    cocos2d::Texture2D* renderFilteredTexture(cocos2d::Sprite* sprite, GAFFilterData* filter);
-    cocos2d::Texture2D* renderFilteredTexture(cocos2d::Sprite* sprite, GAFFilterData* filter, unsigned int hash);
+    ax::Texture2D* renderFilteredTexture(ax::Sprite* sprite, GAFFilterData* filter);
+    ax::Texture2D* renderFilteredTexture(ax::Sprite* sprite, GAFFilterData* filter, unsigned int hash);
 
-    cocos2d::Texture2D* renderBlurTexture(cocos2d::Sprite* sprite, GAFBlurFilterData* filter);
-    cocos2d::Texture2D* renderGlowTexture(cocos2d::Sprite* sprite, GAFGlowFilterData* filter);
-    cocos2d::Texture2D* renderShadowTexture(cocos2d::Sprite* sprite, GAFDropShadowFilterData* filter);
+    ax::Texture2D* renderBlurTexture(ax::Sprite* sprite, GAFBlurFilterData* filter);
+    ax::Texture2D* renderGlowTexture(ax::Sprite* sprite, GAFGlowFilterData* filter);
+    ax::Texture2D* renderShadowTexture(ax::Sprite* sprite, GAFDropShadowFilterData* filter);
     
-    void insertTexture(cocos2d::Texture2D*, unsigned int hash);
+    void insertTexture(ax::Texture2D*, unsigned int hash);
     
 private:
 

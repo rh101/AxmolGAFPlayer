@@ -6,10 +6,10 @@ NS_GAF_BEGIN
 class GAFCachedTexture
 {
 public:
-    cocos2d::Texture2D* operator *();
+    ax::Texture2D* operator *();
     const GAFCachedTexture& operator =(const GAFCachedTexture&);
     GAFCachedTexture();
-    GAFCachedTexture(cocos2d::Texture2D* tex);
+    GAFCachedTexture(ax::Texture2D* tex);
     GAFCachedTexture(const GAFCachedTexture& other);
     ~GAFCachedTexture();
 
@@ -18,7 +18,7 @@ public:
     unsigned int timesUsed() const { return m_timesUsed; }
     size_t memoryUsed() const { return m_memoryUsed; }
 private:
-    cocos2d::
+    ax::
     Texture2D*      m_texture;
     time_t          m_lastUsed;
     time_t          m_created;

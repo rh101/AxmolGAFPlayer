@@ -5,35 +5,35 @@
 
 NS_GAF_BEGIN
 
-void PrimitiveDeserializer::deserialize(GAFStream* in, cocos2d::Vec2* out)
+void PrimitiveDeserializer::deserialize(GAFStream* in, ax::Vec2* out)
 {
     out->x = in->readFloat();
     out->y = in->readFloat();
 }
 
-void PrimitiveDeserializer::deserialize(GAFStream* in, cocos2d::Rect* out)
+void PrimitiveDeserializer::deserialize(GAFStream* in, ax::Rect* out)
 {
     deserialize(in, &out->origin);
     deserialize(in, &out->size);
 }
 
-void PrimitiveDeserializer::deserialize(GAFStream* in, cocos2d::AffineTransform* out)
+void PrimitiveDeserializer::deserialize(GAFStream* in, ax::AffineTransform* out)
 {
-    in->readNBytesOfT(out, sizeof(cocos2d::AffineTransform));
+    in->readNBytesOfT(out, sizeof(ax::AffineTransform));
 }
 
-void PrimitiveDeserializer::deserialize(GAFStream* in, cocos2d::Size* out)
+void PrimitiveDeserializer::deserializeSize(GAFStream* in, ax::Size* out)
 {
     out->width = in->readFloat();
     out->height = in->readFloat();
 }
 
-void PrimitiveDeserializer::deserialize(GAFStream* in, cocos2d::Color4B* out)
+void PrimitiveDeserializer::deserialize(GAFStream* in, ax::Color4B* out)
 {
     in->readNBytesOfT(out, 4);
 }
 
-void PrimitiveDeserializer::translateColor(cocos2d::Color4F& out, unsigned int in)
+void PrimitiveDeserializer::translateColor(ax::Color4F& out, unsigned int in)
 {
     GAFReadColor gcol;
 

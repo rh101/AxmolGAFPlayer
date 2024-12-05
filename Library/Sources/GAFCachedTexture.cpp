@@ -1,18 +1,18 @@
 #include "GAFPrecompiled.h"
 #include "GAFCachedTexture.h"
 
-USING_NS_CC;
+USING_NS_AX;
 using namespace std;
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WINRT || CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+#if AX_TARGET_PLATFORM == AX_PLATFORM_WINRT || AX_TARGET_PLATFORM == AX_PLATFORM_WP8
 
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-using cocos2d::gettimeofday;
+#elif AX_TARGET_PLATFORM == AX_PLATFORM_WIN32
+using ax::gettimeofday;
 #endif
 
 NS_GAF_BEGIN
 
-cocos2d::Texture2D* GAFCachedTexture::operator *()
+ax::Texture2D* GAFCachedTexture::operator *()
 {
     timeval now;
     gettimeofday(&now, nullptr);
@@ -40,7 +40,7 @@ GAFCachedTexture::GAFCachedTexture(Texture2D* tex)
 {
     m_memoryUsed = tex->getBitsPerPixelForFormat() / 8 *
         static_cast<size_t>(tex->getContentSizeInPixels().width * tex->getContentSizeInPixels().height);
-    CC_SAFE_RETAIN(m_texture);
+    AX_SAFE_RETAIN(m_texture);
     timeval now;
     gettimeofday(&now, nullptr);
     m_created = now.tv_sec * 1000 + now.tv_usec;
@@ -58,7 +58,7 @@ const GAFCachedTexture& GAFCachedTexture::operator =(const GAFCachedTexture& oth
     m_created = other.m_created;
     m_timesUsed = other.m_timesUsed;
     m_memoryUsed = other.m_memoryUsed;
-    CC_SAFE_RETAIN(m_texture);
+    AX_SAFE_RETAIN(m_texture);
     return *this;
 }
 
@@ -69,12 +69,12 @@ GAFCachedTexture::GAFCachedTexture(const GAFCachedTexture& other)
 , m_timesUsed(other.m_timesUsed)
 , m_memoryUsed(other.m_memoryUsed)
 {
-    CC_SAFE_RETAIN(m_texture);
+    AX_SAFE_RETAIN(m_texture);
 }
 
 GAFCachedTexture::~GAFCachedTexture()
 {
-    CC_SAFE_RELEASE(m_texture);
+    AX_SAFE_RELEASE(m_texture);
 }
 
 NS_GAF_END

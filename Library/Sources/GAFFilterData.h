@@ -27,7 +27,7 @@ public:
 class GAFBlurFilterData : public GAFFilterData
 {
 public:
-    cocos2d::Size blurSize;
+    ax::Size blurSize;
     GAFBlurFilterData();
 
     virtual void apply(GAFMovieClip*) override;
@@ -55,8 +55,8 @@ public:
 class GAFGlowFilterData : public GAFFilterData
 {
 public:
-    cocos2d::Color4F   color;
-    cocos2d::Size      blurSize;
+    ax::Color4F   color;
+    ax::Size      blurSize;
     float       strength;
     bool        innerGlow;
     bool        knockout;
@@ -68,8 +68,8 @@ public:
 class GAFDropShadowFilterData : public GAFFilterData
 {
 public:
-    cocos2d::Color4F       color;
-    cocos2d::Size          blurSize;
+    ax::Color4F       color;
+    ax::Size          blurSize;
     float           angle;
     float           distance;
     float           strength;

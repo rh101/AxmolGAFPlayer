@@ -3,18 +3,20 @@
 #include "GAFFilterData.h"
 #include "GAFShaderManager.h"
 
-#include "../external/xxhash/xxhash.h"
+#include "xxhash/xxhash.h"
 
-USING_NS_CC;
+USING_NS_AX;
 using namespace std;
 
 NS_GAF_BEGIN
 
-#if GAF_ENABLE_NEW_UNIFORM_SETTER
-#define getUniformId(x) GAFShaderManager::getUniformLocation(x)
-#else
-#define getUniformId(x) GAFShaderManager::getUniformName(x)
-#endif
+//#if GAF_ENABLE_NEW_UNIFORM_SETTER
+//#define getUniformId(x) GAFShaderManager::getUniformLocation(x)
+//#else
+//#define getUniformId(x) GAFShaderManager::getUniformName(x)
+//#endif
+
+#define getUniformId(ps, x) (ps)->getUniformLocation(x)
 
 static const int kGaussianKernelSize = 9;
 
@@ -39,9 +41,9 @@ void GAFFilterManager::update(float dt)
     //m_policy->update(dt);
 }
 
-Texture2D* GAFFilterManager::applyFilter(cocos2d::Sprite* texture, GAFFilterData* filter)
+Texture2D* GAFFilterManager::applyFilter(ax::Sprite* texture, GAFFilterData* filter)
 {
-    int id = hash(texture, filter);
+    auto id = hash(texture, filter);
     if(hasTexture(id))
     {
 
@@ -57,7 +59,7 @@ unsigned int GAFFilterManager::hash(Sprite* sprite, GAFFilterData* filter)
 {
     struct Hash
     {
-        int texture;
+        void* texture;
         Rect rect;
         GAFBlurFilterData blur;
         GAFGlowFilterData glow;
@@ -67,7 +69,7 @@ unsigned int GAFFilterManager::hash(Sprite* sprite, GAFFilterData* filter)
     Hash hash;
     memset((void*)&hash, 0, sizeof(Hash));
 
-    hash.texture = sprite->getTexture()->getName();
+    hash.texture = sprite->getTexture();  // getName();
     hash.rect = sprite->getTextureRect();
 
     if (filter->getType() == GAFFilterType::Blur)
@@ -93,13 +95,13 @@ bool GAFFilterManager::hasTexture(unsigned int id)
 
 Texture2D* GAFFilterManager::renderFilteredTexture(Sprite* sprite, GAFFilterData* filter)
 {
-    int id = hash(sprite, filter);
+    auto id = hash(sprite, filter);
     return renderFilteredTexture(sprite, filter, id);
 }
 
-cocos2d::Texture2D* GAFFilterManager::renderGlowTexture(cocos2d::Sprite* sprite, GAFGlowFilterData* filter)
+ax::Texture2D* GAFFilterManager::renderGlowTexture(ax::Sprite* sprite, GAFGlowFilterData* filter)
 {
-    GLProgram* program = GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Glow);
+    auto program = GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Glow);
 
     const float blurRadiusX = (filter->blurSize.width / 4.f);
     const float blurRadiusY = (filter->blurSize.height / 4.f);
@@ -111,12 +113,11 @@ cocos2d::Texture2D* GAFFilterManager::renderGlowTexture(cocos2d::Sprite* sprite,
     const int rTextureW = static_cast<int>(rTextureSize.width);
     const int rTextureH = static_cast<int>(rTextureSize.height);
 
-    BlendFunc pureBlend = { GL_ONE, GL_ZERO };
+    BlendFunc pureBlend = {backend::BlendFactor::ONE, backend::BlendFactor::ZERO};
 
     RenderTexture* outA = RenderTexture::create(rTextureSize.width, rTextureSize.height);
     // A
     // Draw desired sprite only
-    CHECK_GL_ERROR_DEBUG();
     {
         Sprite *s = Sprite::createWithTexture(sprite->getTexture(), sprite->getTextureRect());
         s->setFlippedY(sprite->isFlippedY());
@@ -131,18 +132,25 @@ cocos2d::Texture2D* GAFFilterManager::renderGlowTexture(cocos2d::Sprite* sprite,
     RenderTexture* outB = RenderTexture::create(rTextureW, rTextureH);
     // B
     // Draw with blur over X coordinate
-    CHECK_GL_ERROR_DEBUG();
     {
-        cocos2d::Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
+        ax::Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
 
-        GLProgramState* state = GLProgramState::create(program);
-        state->setUniformVec2(getUniformId(GAFShaderManager::EUniforms::GlowTexelOffset), texelValue);
-        state->setUniformVec4(getUniformId(GAFShaderManager::EUniforms::GlowColor), *(Vec4*)(&filter->color));
-        state->setUniformFloat(getUniformId(GAFShaderManager::EUniforms::Strength), (float)sqrt(filter->strength));
+        auto* state = new (std::nothrow) ProgramState(program);
+        auto texelValueLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowTexelOffset));
+        auto glowColorLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowColor));
+        auto strengthLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::Strength));
+
+        state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
+        state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
+        auto strength = (float)sqrt(filter->strength);
+        state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outA->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
-        s->setGLProgramState(state);
+        s->setProgramState(state);
         s->setFlippedY(true);
         s->setBlendFunc(pureBlend);
 
@@ -154,18 +162,25 @@ cocos2d::Texture2D* GAFFilterManager::renderGlowTexture(cocos2d::Sprite* sprite,
     RenderTexture* outC = RenderTexture::create(rTextureW, rTextureH);
     // C
     // Draw with blur over Y coordinate
-    CHECK_GL_ERROR_DEBUG();
     {
-        cocos2d::Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
+        ax::Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
 
-        GLProgramState* state = GLProgramState::create(program);
-        state->setUniformVec2(getUniformId(GAFShaderManager::EUniforms::GlowTexelOffset), texelValue);
-        state->setUniformVec4(getUniformId(GAFShaderManager::EUniforms::GlowColor), *(Vec4*)(&filter->color));
-        state->setUniformFloat(getUniformId(GAFShaderManager::EUniforms::Strength), (float)sqrt(filter->strength));
+        auto* state = new (std::nothrow) ProgramState(program);
+        auto texelValueLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowTexelOffset));
+        auto glowColorLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowColor));
+        auto strengthLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::Strength));
+
+        state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
+        state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
+        auto strength = (float)sqrt(filter->strength);
+        state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outB->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
-        s->setGLProgramState(state);
+        s->setProgramState(state);
         s->setFlippedY(true);
         s->setBlendFunc(pureBlend);
 
@@ -173,7 +188,6 @@ cocos2d::Texture2D* GAFFilterManager::renderGlowTexture(cocos2d::Sprite* sprite,
         s->visit();
         outC->end();
     }
-    CHECK_GL_ERROR_DEBUG();
     {
         Sprite *s = Sprite::createWithTexture(sprite->getTexture(), sprite->getTextureRect());
         s->setFlippedY(sprite->isFlippedY());
@@ -182,14 +196,13 @@ cocos2d::Texture2D* GAFFilterManager::renderGlowTexture(cocos2d::Sprite* sprite,
         s->visit();
         outC->end();
     }
-    CHECK_GL_ERROR_DEBUG();
     Director::getInstance()->getRenderer()->render();
     return outC->getSprite()->getTexture();
 }
 
-cocos2d::Texture2D* GAFFilterManager::renderBlurTexture(cocos2d::Sprite* sprite, GAFBlurFilterData* filter)
+ax::Texture2D* GAFFilterManager::renderBlurTexture(ax::Sprite* sprite, GAFBlurFilterData* filter)
 {
-    GLProgram* program = GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Blur);
+    auto* program = GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Blur);
 
     const float blurRadiusX = (filter->blurSize.width / 4.f);
     const float blurRadiusY = (filter->blurSize.height / 4.f);
@@ -201,12 +214,11 @@ cocos2d::Texture2D* GAFFilterManager::renderBlurTexture(cocos2d::Sprite* sprite,
     const int rTextureW = static_cast<int>(rTextureSize.width);
     const int rTextureH = static_cast<int>(rTextureSize.height);
 
-    BlendFunc pureBlend = { GL_ONE, GL_ZERO };
+    BlendFunc pureBlend = {backend::BlendFactor::ONE, backend::BlendFactor::ZERO};
 
     RenderTexture* outA = RenderTexture::create(rTextureSize.width, rTextureSize.height);
     // A
     // Draw desired sprite only
-    CHECK_GL_ERROR_DEBUG();
     {
         Sprite *s = Sprite::createWithTexture(sprite->getTexture(), sprite->getTextureRect());
         s->setFlippedY(sprite->isFlippedY());
@@ -221,16 +233,18 @@ cocos2d::Texture2D* GAFFilterManager::renderBlurTexture(cocos2d::Sprite* sprite,
     RenderTexture* outB = RenderTexture::create(rTextureW, rTextureH);
     // B
     // Draw with blur over X coordinate
-    CHECK_GL_ERROR_DEBUG();
     {
-        cocos2d::Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
+        ax::Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
 
-        GLProgramState* state = GLProgramState::create(program);
-        state->setUniformVec2(getUniformId(GAFShaderManager::EUniforms::BlurTexelOffset), texelValue);
+        auto* state = new (std::nothrow) ProgramState(program);
+        auto texelValueLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::BlurTexelOffset));
+
+        state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
 
         Sprite* s = Sprite::createWithTexture(outA->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
-        s->setGLProgramState(state);
+        s->setProgramState(state);
         s->setFlippedY(true);
         s->setBlendFunc(pureBlend);
 
@@ -242,16 +256,18 @@ cocos2d::Texture2D* GAFFilterManager::renderBlurTexture(cocos2d::Sprite* sprite,
     RenderTexture* outC = RenderTexture::create(rTextureW, rTextureH);
     // C
     // Draw with blur over Y coordinate
-    CHECK_GL_ERROR_DEBUG();
     {
-        cocos2d::Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
+        ax::Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
 
-        GLProgramState* state = GLProgramState::create(program);
-        state->setUniformVec2(getUniformId(GAFShaderManager::EUniforms::BlurTexelOffset), texelValue);
+        auto* state = new (std::nothrow) ProgramState(program);
+        auto texelValueLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::BlurTexelOffset));
+
+        state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
 
         Sprite* s = Sprite::createWithTexture(outB->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
-        s->setGLProgramState(state);
+        s->setProgramState(state);
         s->setFlippedY(true);
         s->setBlendFunc(pureBlend);
 
@@ -259,15 +275,14 @@ cocos2d::Texture2D* GAFFilterManager::renderBlurTexture(cocos2d::Sprite* sprite,
         s->visit();
         outC->end();
     }
-    CHECK_GL_ERROR_DEBUG();
 
     Director::getInstance()->getRenderer()->render();
     return outC->getSprite()->getTexture();
 }
 
-cocos2d::Texture2D* GAFFilterManager::renderShadowTexture(cocos2d::Sprite* sprite, GAFDropShadowFilterData* filter)
+ax::Texture2D* GAFFilterManager::renderShadowTexture(ax::Sprite* sprite, GAFDropShadowFilterData* filter)
 {
-    GLProgram* program = GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Glow);
+    auto* program = GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Glow);
 
     const float blurRadiusX = (filter->blurSize.width / 4.f);
     const float blurRadiusY = (filter->blurSize.height / 4.f);
@@ -279,12 +294,11 @@ cocos2d::Texture2D* GAFFilterManager::renderShadowTexture(cocos2d::Sprite* sprit
     const int rTextureW = static_cast<int>(rTextureSize.width);
     const int rTextureH = static_cast<int>(rTextureSize.height);
 
-    BlendFunc pureBlend = { GL_ONE, GL_ZERO };
+    BlendFunc pureBlend = {backend::BlendFactor::ONE, backend::BlendFactor::ZERO};
 
     RenderTexture* outA = RenderTexture::create(rTextureSize.width, rTextureSize.height);
     // A
     // Draw desired sprite only
-    CHECK_GL_ERROR_DEBUG();
     {
         Sprite *s = Sprite::createWithTexture(sprite->getTexture(), sprite->getTextureRect());
         s->setFlippedY(sprite->isFlippedY());
@@ -299,17 +313,21 @@ cocos2d::Texture2D* GAFFilterManager::renderShadowTexture(cocos2d::Sprite* sprit
     RenderTexture* outB = RenderTexture::create(rTextureW, rTextureH);
     // B
     // Draw with blur over X coordinate
-    CHECK_GL_ERROR_DEBUG();
     {
         Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
 
-        GLProgramState* state = GLProgramState::create(program);
-        state->setUniformVec2(getUniformId(GAFShaderManager::EUniforms::GlowTexelOffset), texelValue);
-        state->setUniformVec4(getUniformId(GAFShaderManager::EUniforms::GlowColor), *(Vec4*)(&filter->color));
+        auto* state = new (std::nothrow) ProgramState(program);
+        auto texelValueLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowTexelOffset));
+        auto glowColorLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowColor));
+
+        state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
+        state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
 
         Sprite* s = Sprite::createWithTexture(outA->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
-        s->setGLProgramState(state);
+        s->setProgramState(state);
         s->setFlippedY(true);
         s->setBlendFunc(pureBlend);
 
@@ -321,17 +339,21 @@ cocos2d::Texture2D* GAFFilterManager::renderShadowTexture(cocos2d::Sprite* sprit
     RenderTexture* outC = RenderTexture::create(rTextureW, rTextureH);
     // C
     // Draw with blur over Y coordinate
-    CHECK_GL_ERROR_DEBUG();
     {
         Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
 
-        GLProgramState* state = GLProgramState::create(program);
-        state->setUniformVec2(getUniformId(GAFShaderManager::EUniforms::GlowTexelOffset), texelValue);
-        state->setUniformVec4(getUniformId(GAFShaderManager::EUniforms::GlowColor), *(Vec4*)(&filter->color));
+        auto* state = new (std::nothrow) ProgramState(program);
+        auto texelValueLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowTexelOffset));
+        auto glowColorLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowColor));
+
+        state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
+        state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
 
         Sprite* s = Sprite::createWithTexture(outB->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
-        s->setGLProgramState(state);
+        s->setProgramState(state);
         s->setFlippedY(true);
         s->setBlendFunc(pureBlend);
 
@@ -360,7 +382,7 @@ Texture2D* GAFFilterManager::renderFilteredTexture(Sprite* sprite, GAFFilterData
     }
     else
     {
-        CCASSERT(false, "Errorr. No filter processor found!");
+        AXASSERT(false, "Errorr. No filter processor found!");
     }
 
     insertTexture(texture, id);
@@ -368,9 +390,9 @@ Texture2D* GAFFilterManager::renderFilteredTexture(Sprite* sprite, GAFFilterData
     return texture;
 }
 
-void GAFFilterManager::insertTexture(cocos2d::Texture2D* texture, unsigned int id)
+void GAFFilterManager::insertTexture(ax::Texture2D* texture, unsigned int id)
 {
-    CCASSERT(texture, "Failed to filter texture");
+    AXASSERT(texture, "Failed to filter texture");
     s_cache[id] = texture;
     
     //m_policy->onInserted(id);
@@ -400,9 +422,7 @@ void GAFFilterManager::insertTexture(cocos2d::Texture2D* texture, unsigned int i
             }
         }
         s_cache.erase(later);
-    
     }
-    
 }
 
 GAFFilterManager* GAFFilterManager::getInstance()

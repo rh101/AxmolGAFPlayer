@@ -9,7 +9,7 @@ NS_GAF_BEGIN
 
 class GAFTextureAtlas;
 
-class GAFTimeline : public cocos2d::Ref
+class GAFTimeline : public ax::Object
 {
 private:
     TextureAtlases_t        m_textureAtlases;
@@ -21,13 +21,13 @@ private:
     TextsData_t             m_textsData;
 
     uint32_t                m_id;
-    cocos2d::Rect           m_aabb;
-    cocos2d::Point          m_pivot;
+    ax::Rect           m_aabb;
+    ax::Point          m_pivot;
 
     unsigned int            m_sceneFps;
     unsigned int            m_sceneWidth;
     unsigned int            m_sceneHeight;
-    cocos2d::Color4B        m_sceneColor;
+    ax::Color4B        m_sceneColor;
 
     uint32_t                m_framesCount;
 
@@ -43,7 +43,7 @@ private:
     void                    _chooseTextureAtlas(float desiredAtlasScale);
 public:
 
-    GAFTimeline(GAFTimeline* parent, uint32_t id, const cocos2d::Rect& aabb, cocos2d::Point& pivot, uint32_t framesCount);
+    GAFTimeline(GAFTimeline* parent, uint32_t id, const ax::Rect& aabb, ax::Point& pivot, uint32_t framesCount);
     virtual ~GAFTimeline();
 
     void                        pushTextureAtlas(GAFTextureAtlas* atlas);
@@ -57,7 +57,7 @@ public:
     void                        setSceneFps(unsigned int);
     void                        setSceneWidth(unsigned int);
     void                        setSceneHeight(unsigned int);
-    void                        setSceneColor(const cocos2d::Color4B&);
+    void                        setSceneColor(const ax::Color4B&);
 
     void                        setLinkageName(const std::string& linkageName);
 
@@ -70,8 +70,8 @@ public:
     const TextureAtlases_t&     getTextureAtlases() const;
     uint32_t                    getFramesCount() const;
 
-    const cocos2d::Rect         getRect() const;
-    const cocos2d::Point        getPivot() const;
+    const ax::Rect         getRect() const;
+    const ax::Point        getPivot() const;
 
     const std::string           getLinkageName() const;
 

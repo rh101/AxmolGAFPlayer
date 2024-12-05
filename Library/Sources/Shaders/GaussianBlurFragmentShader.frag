@@ -1,38 +1,39 @@
+#version 310 es
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Gaussian blur
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const char* GaussianBlurFragmentShader_fs = STRINGIFY(
+precision highp float;
+precision highp int;
 
-\n#ifdef GL_ES\n
-    varying highp vec2 v_texCoord;
-	uniform highp vec2 u_step;
-\n#else\n
-    varying vec2 v_texCoord;
-	uniform vec2 u_step;
-\n#endif\n
+layout(location = COLOR0) in vec4 v_color;
+layout(location = TEXCOORD0) in vec2 v_texCoord;
+
+layout(location = SV_Target0) out vec4 FragColor;
+
+layout(binding = 0) uniform sampler2D u_tex0;
+
+layout(std140) uniform fs_ub {
+    vec2 u_step;
+};
 
 void main()
 {
-\n#ifdef GL_ES\n
-    lowp vec4 sum = vec4(0.0);
-\n#else\n
     vec4 sum = vec4(0.0);
-\n#endif\n
 
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 4.0) * 0.05;
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 3.0) * 0.09;
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 2.0) * 0.12;
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 1.0) * 0.15;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 0.0) * 0.18;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 1.0) * 0.15;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 2.0) * 0.12;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 3.0) * 0.09;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 4.0) * 0.05;
+    sum += texture(u_tex0, v_texCoord - u_step * 4.0) * 0.05;
+    sum += texture(u_tex0, v_texCoord - u_step * 3.0) * 0.09;
+    sum += texture(u_tex0, v_texCoord - u_step * 2.0) * 0.12;
+    sum += texture(u_tex0, v_texCoord - u_step * 1.0) * 0.15;
+    sum += texture(u_tex0, v_texCoord + u_step * 0.0) * 0.18;
+    sum += texture(u_tex0, v_texCoord + u_step * 1.0) * 0.15;
+    sum += texture(u_tex0, v_texCoord + u_step * 2.0) * 0.12;
+    sum += texture(u_tex0, v_texCoord + u_step * 3.0) * 0.09;
+    sum += texture(u_tex0, v_texCoord + u_step * 4.0) * 0.05;
     
-    gl_FragColor = sum;
+    FragColor = sum;
 }
 
-);

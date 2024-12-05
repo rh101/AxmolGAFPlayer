@@ -32,7 +32,7 @@ protected:
 
 public:
     GAFLoader();
-    ~GAFLoader();
+    virtual ~GAFLoader();
 
     bool                 loadFile(const std::string& fname, GAFAsset* context);
     bool                 loadData(const unsigned char* data, size_t len, GAFAsset* context);

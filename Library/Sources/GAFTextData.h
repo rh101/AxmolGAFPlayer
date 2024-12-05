@@ -21,11 +21,11 @@ public:
         };
 
         TextAlign m_align;
-        cocos2d::TextHAlignment getTextAlignForCocos() const;
+        ax::TextHAlignment getTextAlignForCocos() const;
 
         float m_letterSpacing; // !! unused
 
-        cocos2d::Color4F m_color;
+        ax::Color4F m_color;
 
         uint32_t m_blockIndent; // !! unused
         uint32_t m_indent; // !! unused
@@ -47,7 +47,7 @@ public:
         std::string m_url; // !! unused
     };
 
-    cocos2d::Point m_pivot;
+    ax::Point m_pivot;
 
     float m_width;
     float m_height;

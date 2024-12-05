@@ -10,7 +10,7 @@ class GAFTextField : public GAFObject
 
 
 public:
-    cocos2d::Label *m_label;
+    ax::Label *m_label;
 
     GAFTextField();
     virtual ~GAFTextField();

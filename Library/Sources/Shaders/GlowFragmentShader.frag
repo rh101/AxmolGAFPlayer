@@ -1,42 +1,41 @@
-const char* GlowFragmentShader_fs = STRINGIFY(
+#version 310 es
 
-\n#ifdef GL_ES\n
-	const lowp int GAUSSIAN_SAMPLES = 9;
+precision highp float;
+precision highp int;
 
-	varying highp vec2 v_texCoord;
-	uniform highp vec2 u_step;
-	uniform highp vec4 u_glowColor;
-    uniform highp float u_strength;
-\n#else\n
-	const int GAUSSIAN_SAMPLES = 9;
+layout(location = COLOR0) in vec4 v_color;
+layout(location = TEXCOORD0) in vec2 v_texCoord;
 
-	varying vec2 v_texCoord;
-	uniform vec2 u_step;
-	uniform vec4 u_glowColor;
-    uniform float u_strength;
-\n#endif\n
+layout(location = SV_Target0) out vec4 FragColor;
+
+layout(binding = 0) uniform sampler2D u_tex0;
+
+layout(std140) uniform fs_ub {
+    vec2 u_step;
+    vec4 u_glowColor;
+    float u_strength;
+};
+
+const lowp int GAUSSIAN_SAMPLES = 9;
 
 void main()
 {
-\n#ifdef GL_ES\n
- 	lowp vec4 sum = vec4(0.0);
-\n#else\n
-	vec4 sum = vec4(0.0);
-\n#endif\n
 
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 4.0).a * 0.05;
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 3.0).a * 0.09;
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 2.0).a * 0.12;
-    sum += texture2D(CC_Texture0, v_texCoord - u_step * 1.0).a * 0.15;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 0.0).a * 0.18;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 1.0).a * 0.15;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 2.0).a * 0.12;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 3.0).a * 0.09;
-    sum += texture2D(CC_Texture0, v_texCoord + u_step * 4.0).a * 0.05;
+	vec4 sum = vec4(0.0);
+
+    sum += texture(u_tex0, v_texCoord - u_step * 4.0).a * 0.05;
+    sum += texture(u_tex0, v_texCoord - u_step * 3.0).a * 0.09;
+    sum += texture(u_tex0, v_texCoord - u_step * 2.0).a * 0.12;
+    sum += texture(u_tex0, v_texCoord - u_step * 1.0).a * 0.15;
+    sum += texture(u_tex0, v_texCoord + u_step * 0.0).a * 0.18;
+    sum += texture(u_tex0, v_texCoord + u_step * 1.0).a * 0.15;
+    sum += texture(u_tex0, v_texCoord + u_step * 2.0).a * 0.12;
+    sum += texture(u_tex0, v_texCoord + u_step * 3.0).a * 0.09;
+    sum += texture(u_tex0, v_texCoord + u_step * 4.0).a * 0.05;
 
     sum *= u_strength;
     
-	/*/color.a = clamp(color.a * Scale.x, 0.0, 1.0);*/
-    gl_FragColor = sum * u_glowColor;
+	/*color.a = clamp(color.a * Scale.x, 0.0, 1.0);*/
+    FragColor = sum * u_glowColor;
 }
-);
+

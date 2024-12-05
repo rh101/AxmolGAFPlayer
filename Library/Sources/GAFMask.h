@@ -8,11 +8,11 @@ class GAFMask : public GAFObject
 {
 public:
     GAFMask();
-    ~GAFMask();
-    virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated) override;
+    ~GAFMask() override;
+    virtual bool initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect, bool rotated) override;
 
-    virtual void draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override;
-    virtual void visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override;
+    virtual void draw(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags) override;
+    virtual void visit(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags) override;
 };
 
 NS_GAF_END

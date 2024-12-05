@@ -22,17 +22,17 @@ public:
     GAFResourcesInfoTexture(std::string _source, float _csf)
     {
         id = ResourceId::Texture;
-        source = _source;
+        source = std::move(_source);
         csf = _csf;
     }
 
-    bool operator==(const GAFResourcesInfoTexture &other)
+    bool operator==(const GAFResourcesInfoTexture &other) const
     {
-        return source.compare(other.source) == 0 && fabs(csf - other.csf) < std::numeric_limits<float>::epsilon();
+        return source == other.source && fabs(csf - other.csf) < std::numeric_limits<float>::epsilon();
     }
 
     std::string source;
-    float csf;
+    float csf{};
 };
 
 class GAFResourcesInfoFont : public GAFResourcesInfo
@@ -42,13 +42,10 @@ public:
     GAFResourcesInfoFont(std::string _name)
     {
         id = ResourceId::Font;
-        name = _name;
+        name = std::move(_name);
     }
 
-    bool operator==(const GAFResourcesInfoFont &other)
-    {
-        return name.compare(other.name) == 0;
-    }
+    bool operator==(const GAFResourcesInfoFont& other) const { return name == other.name; }
 
     std::string name;
 };

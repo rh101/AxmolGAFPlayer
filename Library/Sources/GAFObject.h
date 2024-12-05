@@ -14,19 +14,19 @@ class GAFTimeline;
 class GAFObject : public GAFSprite
 {
 private:
-    const cocos2d::AffineTransform AffineTransformFlashToCocos(const cocos2d::AffineTransform& aTransform);
+    const ax::AffineTransform AffineTransformFlashToCocos(const ax::AffineTransform& aTransform);
 
 public:
 
     typedef std::vector<GAFObject*> DisplayList_t;
-    typedef std::vector<cocos2d::ClippingNode*> MaskList_t;
+    typedef std::vector<ax::ClippingNode*> MaskList_t;
 private:
     GAFSequenceDelegate_t                   m_sequenceDelegate;
     GAFAnimationFinishedPlayDelegate_t      m_animationFinishedPlayDelegate;
     GAFAnimationStartedNextLoopDelegate_t   m_animationStartedNextLoopDelegate;
     GAFFramePlayedDelegate_t                m_framePlayedDelegate;
     
-    cocos2d::Node*                          m_container;
+    ax::Node*                          m_container;
 
     uint32_t                                m_totalFrameCount;
     uint32_t                                m_currentSequenceStart;
@@ -51,8 +51,8 @@ private:
     /// schedule/unschedule
     /// @note this function is automatically called in start/stop
     void enableTick(bool val);
-    void realizeFrame(cocos2d::Node* out, uint32_t frameIndex);
-    void rearrangeSubobject(cocos2d::Node* out, cocos2d::Node* child, int zIndex);
+    void realizeFrame(ax::Node* out, uint32_t frameIndex);
+    void rearrangeSubobject(ax::Node* out, ax::Node* child, int zIndex);
 
 protected:
     GAFObject*                              m_timelineParentObject;
@@ -66,7 +66,7 @@ protected:
     uint32_t                                m_showingFrame; // Frame number that is valid from the beginning of realize frame
     uint32_t                                m_lastVisibleInFrame; // Last frame that object was visible in
     Filters_t                               m_parentFilters;
-    cocos2d::Vec4                           m_parentColorTransforms[2];
+    ax::Vec4                           m_parentColorTransforms[2];
 
     GAFFilterData*                          m_customFilter;
 
@@ -99,15 +99,15 @@ public:
     /// @note do not forget to call setFramePlayedDelegate(nullptr) before deleting your subscriber
     void setFramePlayedDelegate(GAFFramePlayedDelegate_t delegate);
 
-    void visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override;
-    void draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override
+    void visit(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags) override;
+    void draw(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags) override
     {
         (void)flags;
         (void)renderer;
         (void)transform;
     }
 
-    void useExternalTextureAtlas(std::vector<cocos2d::Texture2D*>& textures, GAFTextureAtlas::Elements_t& elements);
+    void useExternalTextureAtlas(std::vector<ax::Texture2D*>& textures, GAFTextureAtlas::Elements_t& elements);
 
 public:
     void    processAnimation();
@@ -163,7 +163,7 @@ public:
     void        setAnimationRunning(bool value, bool recurcive);
 public:
 
-    virtual ~GAFObject();
+    ~GAFObject() override;
 
     static GAFObject * create(GAFAsset * anAsset, GAFTimeline* timeline);
 
@@ -173,23 +173,23 @@ public:
 
     bool isVisibleInCurrentFrame() const;
 
-    cocos2d::Rect getBoundingBoxForCurrentFrame();
+    ax::Rect getBoundingBoxForCurrentFrame();
 
     const AnimationSequences_t& getSequences() const;
     GAFTimeline* getTimeLine() { return m_timeline; }
     DisplayList_t& getDisplayList() { return m_displayList; }
     const DisplayList_t& getDisplayList() const { return m_displayList; }
 
-    virtual const cocos2d::Mat4& getNodeToParentTransform() const override;
-    virtual cocos2d::AffineTransform getNodeToParentAffineTransform() const override;
+    virtual const ax::Mat4& getNodeToParentTransform() const override;
+    virtual ax::AffineTransform getNodeToParentAffineTransform() const override;
 
-    virtual void setColor(const cocos2d::Color3B& color) override;
+    virtual void setColor(const ax::Color3B& color) override;
     virtual void setOpacity(GLubyte opacity) override;
 
     template <typename FilterSubtype>
     void setCustomFilter(const FilterSubtype* filter)
     {
-        CC_SAFE_DELETE(m_customFilter);
+        AX_SAFE_DELETE(m_customFilter);
         if (filter)
         {
             m_customFilter = new FilterSubtype(*filter);

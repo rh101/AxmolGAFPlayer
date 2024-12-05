@@ -1,6 +1,6 @@
 #include "GAFPrecompiled.h"
 #include "GAFFile.h"
-#include "platform/CCFileUtils.h"
+#include "platform/FileUtils.h"
 
 #define USE_ZLIB 1
 
@@ -188,19 +188,19 @@ unsigned char* GAFFile::_getData(const std::string& filename, const char* openMo
     //const char* mode = nullptr;
 
 #ifdef ANDROID
-    ret = cocos2d::FileUtilsAndroid::getInstance()->getFileData(filename, openMode, &size);
+    ret = ax::FileUtilsAndroid::getInstance()->getFileData(filename, openMode, &size);
 #else
     do
     {
         // Read the file from hardware
-        std::string fullPath = cocos2d::FileUtils::getInstance()->fullPathForFilename(filename);
+        std::string fullPath = ax::FileUtils::getInstance()->fullPathForFilename(filename);
         FILE *fp = fopen(fullPath.c_str(), openMode);
-        CC_BREAK_IF(!fp);
+        AX_BREAK_IF(!fp);
         fseek(fp, 0, SEEK_END);
         size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         
-        ret = new unsigned char[size];
+        ret  = new unsigned char[size];
 
         size = fread(ret, sizeof(unsigned char), size, fp);
         fclose(fp);
@@ -211,7 +211,7 @@ unsigned char* GAFFile::_getData(const std::string& filename, const char* openMo
     {
         std::string msg = "Get data from file(";
         msg.append(filename).append(") failed!");
-        CCLOG("%s", msg.c_str());
+        AXLOGD("{}", msg);
     }
     else
     {

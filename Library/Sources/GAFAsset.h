@@ -17,7 +17,7 @@ class GAFTimelineAction;
 
 class GAFLoader;
 
-class GAFAsset : public cocos2d::Ref
+class GAFAsset : public ax::Object
 {
     friend class GAFObject;
 private:
@@ -31,7 +31,7 @@ private:
     void setRootTimeline(GAFTimeline* tl);
 
     void parseReferences(std::vector<GAFResourcesInfo*> &dest);
-    void loadTextures(const std::string& filePath, GAFTextureLoadDelegate_t delegate, cocos2d::ZipFile* bundle = nullptr);
+    void loadTextures(const std::string& filePath, GAFTextureLoadDelegate_t delegate, ax::ZipFile* bundle = nullptr);
     void _chooseTextureAtlas(float desiredAtlasScale);
     GAFTextureLoadDelegate_t m_textureLoadDelegate;
 	GAFAssetTextureManager*	m_textureManager;
@@ -41,7 +41,7 @@ private:
     unsigned int            m_sceneFps;
     unsigned int            m_sceneWidth;
     unsigned int            m_sceneHeight;
-    cocos2d::Color4B        m_sceneColor;
+    ax::Color4B        m_sceneColor;
 
     float                   m_desiredAtlasScale;
 
@@ -89,7 +89,7 @@ public:
     static void                 getResourceReferences(const std::string& gafFilePath, std::vector<GAFResourcesInfo*> &dest);
     static void                 getResourceReferencesFromBundle(const std::string& zipfilePath, const std::string& entryFile, std::vector<GAFResourcesInfo*> &dest);
     
-    void                        useExternalTextureAtlas(std::vector<cocos2d::Texture2D*>& textures, GAFTextureAtlas::Elements_t& elements);
+    void                        useExternalTextureAtlas(std::vector<ax::Texture2D*>& textures, GAFTextureAtlas::Elements_t& elements);
 
     GAFTextureAtlas*            getTextureAtlas();
     void                        loadImages(float desiredAtlasScale);
@@ -117,11 +117,11 @@ public:
     const unsigned int getSceneFps() const;
     const unsigned int getSceneWidth() const;
     const unsigned int getSceneHeight() const;
-    const cocos2d::Color4B& getSceneColor() const;
+    const ax::Color4B& getSceneColor() const;
     void setSceneFps(unsigned int);
     void setSceneWidth(unsigned int);
     void setSceneHeight(unsigned int);
-    void setSceneColor(const cocos2d::Color4B&);
+    void setSceneColor(const ax::Color4B&);
 
     const std::string&          getGAFFileName() const;
 };

@@ -3,20 +3,20 @@
 
 NS_GAF_BEGIN
 
-cocos2d::TextHAlignment GAFTextData::TextFormat::getTextAlignForCocos() const
+ax::TextHAlignment GAFTextData::TextFormat::getTextAlignForCocos() const
 {
     switch (m_align)
     {
     case TextAlign::Left:
-        return cocos2d::TextHAlignment::LEFT;
+        return ax::TextHAlignment::LEFT;
     case TextAlign::Right:
-        return cocos2d::TextHAlignment::RIGHT;
+        return ax::TextHAlignment::RIGHT;
     case TextAlign::Center:
-        return cocos2d::TextHAlignment::CENTER;
+        return ax::TextHAlignment::CENTER;
     default:
-        CCAssert(false, "Not Implemented");
+        AXASSERT(false, "Not Implemented");
     }
-    return cocos2d::TextHAlignment::LEFT;
+    return ax::TextHAlignment::LEFT;
 }
 
 NS_GAF_END

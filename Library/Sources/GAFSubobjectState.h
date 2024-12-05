@@ -27,7 +27,7 @@ public:
     unsigned int maskObjectIdRef;
 
     int zIndex;
-    cocos2d::AffineTransform affineTransform;
+    ax::AffineTransform affineTransform;
 
     bool initEmpty(unsigned int objectIdRef);
 

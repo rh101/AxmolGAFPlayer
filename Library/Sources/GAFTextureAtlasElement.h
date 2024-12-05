@@ -8,8 +8,8 @@ class GAFTextureAtlasElement
 {
 public:
     std::string name;
-    cocos2d::Vec2      pivotPoint;
-    cocos2d::Rect      bounds;
+    ax::Vec2      pivotPoint;
+    ax::Rect      bounds;
     
     unsigned int       atlasIdx;
     unsigned int       elementAtlasIdx;
@@ -19,11 +19,11 @@ public:
     GAFTextureAtlasElement();  
 
     void setScale(float s);
-    const float getScale() const { return scale; }
+    float getScale() const { return scale; }
     void setScaleX(float s);
-    const float getScaleX() const { return scaleX; }
+    float getScaleX() const { return scaleX; }
     void setScaleY(float s);
-    const float getScaleY() const { return scaleY; }
+    float getScaleY() const { return scaleY; }
 
 private:
     float              scale;

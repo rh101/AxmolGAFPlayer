@@ -1,10 +1,7 @@
 #pragma once
 
-#ifndef COCOS2D_VERSION
-#error Header "cocos2d.h" must be included
-#elif COCOS2D_VERSION < 0x00030700
-#error Current version of Cocos2d-x is lower than minimal required v3.3.0\
-    For lower versions please use branch `release` from here https://github.com/CatalystApps/Cocos2dxGAFPlayer
+#ifndef AX_VERSION
+#error Header "axmol.h" must be included
 #else
 
 #include "GAFMacros.h"

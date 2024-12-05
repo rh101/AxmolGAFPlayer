@@ -11,12 +11,12 @@ class PrimitiveDeserializer
         unsigned char b, g, r, a;
     };
 public:
-    static void deserialize(GAFStream* in, cocos2d::Vec2* out);
-    static void deserialize(GAFStream* in, cocos2d::Rect* out);
-    static void deserialize(GAFStream* in, cocos2d::AffineTransform* out);
-    static void deserialize(GAFStream* in, cocos2d::Size* out);
-    static void deserialize(GAFStream* in, cocos2d::Color4B* out);
-    static void translateColor(cocos2d::Color4F& out, unsigned int in);
+    static void deserialize(GAFStream* in, ax::Vec2* out);
+    static void deserialize(GAFStream* in, ax::Rect* out);
+    static void deserialize(GAFStream* in, ax::AffineTransform* out);
+    static void deserializeSize(GAFStream* in, ax::Size* out);
+    static void deserialize(GAFStream* in, ax::Color4B* out);
+    static void translateColor(ax::Color4F& out, unsigned int in);
 };
 
 NS_GAF_END

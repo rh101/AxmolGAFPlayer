@@ -3,11 +3,11 @@
 #include "GAFCollections.h"
 
 #include "math/TransformUtils.h"
-#include "../external/xxhash/xxhash.h"
+#include "xxhash/xxhash.h"
 
-USING_NS_CC;
+USING_NS_AX;
 
-#if CC_SPRITEBATCHNODE_RENDER_SUBPIXEL
+#if AX_SPRITEBATCHNODE_RENDER_SUBPIXEL
 #define RENDER_IN_SUBPIXEL
 #else
 #define RENDER_IN_SUBPIXEL(__A__) ( (int)(__A__))
@@ -22,32 +22,29 @@ GAFSprite::GAFSprite()
 , m_externalTransform(AffineTransform::IDENTITY)
 , m_rotation(GAFRotation::NONE)
 {
-    setFlippedX(false); // Fix non-inited vars in cocos
-    setFlippedY(false);
-    _rectRotated = false;
 }
 
-bool GAFSprite::initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation)
+bool GAFSprite::initWithSpriteFrame(ax::SpriteFrame *spriteFrame, GAFRotation rotation)
 {
     m_rotation = rotation;
     return initWithSpriteFrame(spriteFrame);
 }
 
-bool GAFSprite::initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame)
+bool GAFSprite::initWithSpriteFrame(ax::SpriteFrame *spriteFrame)
 {
-    CCASSERT(spriteFrame != nullptr, "");
+    AXASSERT(spriteFrame != nullptr, "");
 
-    bool bRet = cocos2d::Sprite::initWithTexture(spriteFrame->getTexture(), spriteFrame->getRect());
+    bool bRet = ax::Sprite::initWithTexture(spriteFrame->getTexture(), spriteFrame->getRect());
     setSpriteFrame(spriteFrame);
 
     return bRet;
 }
 
-bool GAFSprite::initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated)
+bool GAFSprite::initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect, bool rotated)
 {
-    if (cocos2d::Sprite::initWithTexture(pTexture, rect, rotated))
+    if (ax::Sprite::initWithTexture(pTexture, rect, rotated))
     {
-        setGLProgram(cocos2d::GLProgramCache::getInstance()->getGLProgram(cocos2d::GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR));
+        setProgramStateByProgramId(backend::ProgramType::POSITION_TEXTURE_COLOR);
         return true;
     }
     else
@@ -56,60 +53,61 @@ bool GAFSprite::initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rec
     }
 }
 
-void GAFSprite::setTexture(cocos2d::Texture2D *texture)
+void GAFSprite::setTexture(ax::Texture2D *texture)
 {
-    // If batchnode, then texture id should be the same
-    CCAssert(!_batchNode || texture->getName() == _batchNode->getTexture()->getName(), "cocos2d::Sprite: Batched sprites should use the same texture as the batchnode");
-    // accept texture==nil as argument
-    CCAssert(!texture || dynamic_cast<cocos2d::Texture2D*>(texture), "setTexture expects a cocos2d::Texture2D. Invalid argument");
+    Sprite::setTexture(texture);
+    //AXASSERT(!_batchNode || (texture && texture == _batchNode->getTexture()),
+    //         "CCSprite: Batched sprites should use the same texture as the batchnode");
+    //// accept texture==nil as argument
+    //AXASSERT(!texture || dynamic_cast<ax::Texture2D*>(texture), "setTexture expects a ax::Texture2D. Invalid argument");
 
-    if (!_batchNode && _texture != texture)
-    {
-        CC_SAFE_RETAIN(texture);
-        CC_SAFE_RELEASE(_texture);
-        _texture = texture;
-        updateBlendFunc();
-    }
+    //if (!_batchNode && _texture != texture)
+    //{
+    //    AX_SAFE_RETAIN(texture);
+    //    AX_SAFE_RELEASE(_texture);
+    //    _texture = texture;
+    //    updateBlendFunc();
+    //}
 }
 
-void GAFSprite::setVertexRect(const cocos2d::Rect& rect)
+void GAFSprite::setVertexRect(const ax::Rect& rect)
 {
-    _rect = rect;
+    Sprite::setVertexRect(rect);
     if (m_rotation != GAFRotation::NONE)
     {
         std::swap(_rect.size.width, _rect.size.height);
     }
 }
 
-void GAFSprite::setTextureRect(const cocos2d::Rect& rect, bool rotated, const cocos2d::Size& untrimmedSize)
+void GAFSprite::setTextureRect(const ax::Rect& rect, bool rotated, const ax::Size& untrimmedSize)
 {
-    cocos2d::Size rotatedSize = untrimmedSize;
+    ax::Size rotatedSize = untrimmedSize;
     if (m_rotation != GAFRotation::NONE)
     {
         rotated = true;
-        rotatedSize = cocos2d::Size(rotatedSize.height, rotatedSize.width);
+        rotatedSize = ax::Size(rotatedSize.height, rotatedSize.width);
     }
-    cocos2d::Sprite::setTextureRect(rect, rotated, rotatedSize);
+    ax::Sprite::setTextureRect(rect, rotated, rotatedSize);
 }
 
-void GAFSprite::setTextureCoords(const cocos2d::Rect& rect)
+void GAFSprite::setTextureCoords(const ax::Rect& rect)
 {
-    cocos2d::Sprite::setTextureCoords(rect, &_quad);
+    ax::Sprite::setTextureCoords(rect, &_quad);
 }
 
-void GAFSprite::setTextureCoords(const cocos2d::Rect& rect, cocos2d::V3F_C4B_T2F_Quad* outQuad)
+void GAFSprite::setTextureCoords(const ax::Rect& rect, ax::V3F_C4B_T2F_Quad* outQuad)
 {
-    cocos2d::Rect rectInPixels = CC_RECT_POINTS_TO_PIXELS(rect);
-    
-    cocos2d::Texture2D *tex = _batchNode ? _textureAtlas->getTexture() : _texture;
-    if (!tex)
-    {
+    Texture2D* tex =
+        (_renderMode == RenderMode::QUAD_BATCHNODE) ? _textureAtlas->getTexture() : _texture;
+
+    if (tex == nullptr)
         return;
-    }
-    
-    float atlasWidth = (float)tex->getPixelsWide();
-    float atlasHeight = (float)tex->getPixelsHigh();
-    
+
+    const auto rectInPixels = AX_RECT_POINTS_TO_PIXELS(rect);
+
+    const float atlasWidth  = (float)tex->getPixelsWide();
+    const float atlasHeight = (float)tex->getPixelsHigh();
+
     float rw = rectInPixels.size.width;
     float rh = rectInPixels.size.height;
     
@@ -195,9 +193,9 @@ void GAFSprite::setTextureCoords(const cocos2d::Rect& rect, cocos2d::V3F_C4B_T2F
     }
 }
 
-void GAFSprite::setExternalTransform(const cocos2d::AffineTransform& transform)
+void GAFSprite::setExternalTransform(const ax::AffineTransform& transform)
 {
-    if (!cocos2d::AffineTransformEqualToTransform(getExternalTransform(), transform))
+    if (!ax::AffineTransformEqualToTransform(getExternalTransform(), transform))
     {
         m_externalTransform = transform;
         _transformUpdated = true;
@@ -206,50 +204,66 @@ void GAFSprite::setExternalTransform(const cocos2d::AffineTransform& transform)
     }
 }
 
-const cocos2d::AffineTransform& GAFSprite::getExternalTransform() const
+const ax::AffineTransform& GAFSprite::getExternalTransform() const
 {
     return m_externalTransform;
 }
 
-const cocos2d::Mat4& GAFSprite::getNodeToParentTransform() const
+const ax::Mat4& GAFSprite::getNodeToParentTransform() const
 {
     if (_transformDirty)
     {
         if (m_atlasScale != 1.f)
         {
-            cocos2d::AffineTransform transform = cocos2d::AffineTransformScale(getExternalTransform(), m_atlasScale, m_atlasScale);
-            cocos2d::CGAffineToGL(cocos2d::AffineTransformTranslate(transform, -_anchorPointInPoints.x, -_anchorPointInPoints.y), _transform.m);
+            ax::AffineTransform transform = ax::AffineTransformScale(getExternalTransform(), m_atlasScale, m_atlasScale);
+            ax::CGAffineToGL(ax::AffineTransformTranslate(transform, -_anchorPointInPoints.x, -_anchorPointInPoints.y), _transform.m);
         }
         else
         {
-            cocos2d::CGAffineToGL(cocos2d::AffineTransformTranslate(getExternalTransform(), -_anchorPointInPoints.x, -_anchorPointInPoints.y), _transform.m);
+            ax::CGAffineToGL(ax::AffineTransformTranslate(getExternalTransform(), -_anchorPointInPoints.x, -_anchorPointInPoints.y), _transform.m);
         }
-        _transformDirty = false;
     }
+
+    if (_additionalTransform)
+    {
+        // This is needed to support both Node::setNodeToParentTransform() and Node::setAdditionalTransform()
+        // at the same time. The scenario is this:
+        // at some point setNodeToParentTransform() is called.
+        // and later setAdditionalTransform() is called every time. And since _transform
+        // is being overwritten everyframe, _additionalTransform[1] is used to have a copy
+        // of the last "_transform without _additionalTransform"
+        if (_transformDirty)
+            _additionalTransform[1] = _transform;
+
+        if (_transformUpdated)
+            _transform = _additionalTransform[1] * _additionalTransform[0];
+    }
+
+    _transformDirty = _additionalTransformDirty = false;
 
     return _transform;
 }
 
-cocos2d::AffineTransform GAFSprite::getNodeToParentAffineTransform() const
+ax::AffineTransform GAFSprite::getNodeToParentAffineTransform() const
 {
-    cocos2d::AffineTransform transform;
+    ax::AffineTransform transform;
     if (_transformDirty)
     {
         transform = getExternalTransform();
         if (m_atlasScale != 1.0f)
         {
-            transform = cocos2d::AffineTransformScale(transform, m_atlasScale, m_atlasScale);
+            transform = ax::AffineTransformScale(transform, m_atlasScale, m_atlasScale);
         }
 
-        cocos2d::CGAffineToGL(cocos2d::AffineTransformTranslate(transform, -_anchorPointInPoints.x, -_anchorPointInPoints.y), _transform.m);
+        ax::CGAffineToGL(ax::AffineTransformTranslate(transform, -_anchorPointInPoints.x, -_anchorPointInPoints.y), _transform.m);
         _transformDirty = false;
     }
-    cocos2d::GLToCGAffine(_transform.m, &transform);
+    ax::GLToCGAffine(_transform.m, &transform);
 
     return transform;
 }
 
-void GAFSprite::draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags)
+void GAFSprite::draw(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags)
 {
     (void)flags;
     if (m_isLocator)
@@ -266,7 +280,19 @@ void GAFSprite::draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform
     transform.transformPoint(&m_quad.bl.vertices);
     transform.transformPoint(&m_quad.br.vertices);
 
-    m_quadCommand.init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, &m_quad, 1, Mat4::IDENTITY, id);
+    auto& pipelineDescriptor        = m_quadCommand.getPipelineDescriptor();
+    if (pipelineDescriptor.programState != _programState)
+    {
+        pipelineDescriptor.programState = _programState;
+    }
+
+    auto& pipelineQuad = m_quadCommand.getPipelineDescriptor();
+
+    const auto& projectionMat = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    pipelineQuad.programState->setUniform(_mvpMatrixLocation, projectionMat.m, sizeof(projectionMat.m));
+    pipelineQuad.programState->setTexture(_texture->getBackendTexture());
+
+    m_quadCommand.init(_globalZOrder, _texture, _blendFunc, &m_quad, 1, Mat4::IDENTITY, id);
     renderer->addCommand(&m_quadCommand);
 }
 
@@ -283,12 +309,25 @@ void GAFSprite::setAtlasScale(float scale)
 uint32_t GAFSprite::setUniforms()
 {
     uint32_t materialID = Renderer::MATERIAL_ID_DO_NOT_BATCH;
-    if (_glProgramState->getUniformCount() == 0)
+    if (_programState)
     {
-        int glProgram = (int)getGLProgram()->getProgram();
-        int intArray[4] = { glProgram, (int)getTexture()->getName(), (int)getBlendFunc().src, (int)getBlendFunc().dst };
+        struct
+        {
+            void* texture;
+            void* prog;
+            backend::BlendFactor src;
+            backend::BlendFactor dst;
+        } hashMe = {};
 
-        materialID = XXH32((const void*)intArray, sizeof(intArray), 0);
+        // NOTE: Initialize hashMe struct to make the value of padding bytes be filled with zero.
+        // It's important since XXH32 below will also consider the padding bytes which probably
+        // are set to random values by different compilers.
+
+        hashMe.texture = _texture;
+        hashMe.src     = getBlendFunc().src;
+        hashMe.dst     = getBlendFunc().dst;
+        hashMe.prog    = _programState->getProgram();
+        materialID     = XXH32((const void*)&hashMe, sizeof(hashMe), 0);
     }
     return materialID;
 }

@@ -8,13 +8,13 @@ NS_GAF_BEGIN
 typedef struct _gafBlendFuncSeparate
 {
     // source blend function
-    GLenum src;
+    ax::backend::BlendFactor src;
     // destination blend function
-    GLenum dst;
+    ax::backend::BlendFactor dst;
     // source alpha channel blend function
-    GLenum srcAlpha;
+    ax::backend::BlendFactor srcAlpha;
     // destination alpha channel blend function
-    GLenum dstAlpha;
+    ax::backend::BlendFactor dstAlpha;
 
 } gafBlendFuncSeparate;
 
@@ -22,28 +22,28 @@ typedef struct _gafBlendFuncSeparate
 ///	This is utility class used by GAF playback. Base class for all sprites
 /// used by GAF.
 
-class GAFSprite : public cocos2d::Sprite
+class GAFSprite : public ax::Sprite
 {
 public:
     GAFSprite();
 
-    bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation);
-    virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame) override;
-    virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated) override;
-    void setTexture(cocos2d::Texture2D *texture) override;
+    bool initWithSpriteFrame(ax::SpriteFrame *spriteFrame, GAFRotation rotation);
+    virtual bool initWithSpriteFrame(ax::SpriteFrame *spriteFrame) override;
+    virtual bool initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect, bool rotated) override;
+    void setTexture(ax::Texture2D *texture) override;
 
-    virtual void setVertexRect(const cocos2d::Rect& rect) override;
-    virtual void setTextureRect(const cocos2d::Rect& rect, bool rotated, const cocos2d::Size& untrimmedSize) override;
+    virtual void setVertexRect(const ax::Rect& rect) override;
+    virtual void setTextureRect(const ax::Rect& rect, bool rotated, const ax::Size& untrimmedSize) override;
     
-    virtual void setTextureCoords(const cocos2d::Rect& rect) override;
-    virtual void setTextureCoords(const cocos2d::Rect& rect, cocos2d::V3F_C4B_T2F_Quad* outQuad) override;
+    virtual void setTextureCoords(const ax::Rect& rect) override;
+    virtual void setTextureCoords(const ax::Rect& rect, ax::V3F_C4B_T2F_Quad* outQuad) override;
 
-    void setExternalTransform(const cocos2d::AffineTransform& transform);
-    const cocos2d::AffineTransform& getExternalTransform() const;
+    void setExternalTransform(const ax::AffineTransform& transform);
+    const ax::AffineTransform& getExternalTransform() const;
 
-    virtual const cocos2d::Mat4& getNodeToParentTransform() const override;
-    virtual cocos2d::AffineTransform getNodeToParentAffineTransform() const override;
-    virtual void draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override;
+    virtual const ax::Mat4& getNodeToParentTransform() const override;
+    virtual ax::AffineTransform getNodeToParentAffineTransform() const override;
+    virtual void draw(ax::Renderer *renderer, const ax::Mat4 &transform, uint32_t flags) override;
     
     void setAtlasScale(float scale);
 
@@ -73,16 +73,15 @@ protected:
 public:
     uint32_t objectIdRef;
 protected:
-    cocos2d::AffineTransform    m_externalTransform;
-    cocos2d::CustomCommand      m_customCommand;
+    ax::AffineTransform    m_externalTransform;
+    //ax::CustomCommand      m_customCommand;
     GAFQuadCommand              m_quadCommand;
 private:
 
     /**
     * Quad is equal to _quad but transformed to view space
     */
-    cocos2d::
-        V3F_C4B_T2F_Quad    m_quad;
+    ax::V3F_C4B_T2F_Quad    m_quad;
 
     float                   m_atlasScale;
     bool                    m_isLocator;

@@ -21,8 +21,8 @@ public:
 
     // Version 3
     unsigned short  framesCount;
-    cocos2d::Rect   frameSize;
-    cocos2d::Vec2   pivot;
+    ax::Rect   frameSize;
+    ax::Vec2   pivot;
 	
     // Version 4
     std::vector<float>          scaleValues;

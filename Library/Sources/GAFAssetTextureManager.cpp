@@ -2,8 +2,8 @@
 
 #include "GAFAssetTextureManager.h"
 
-#if CC_ENABLE_CACHE_TEXTURE_DATA
-#include "renderer/CCTextureCache.h"
+#if AX_ENABLE_CACHE_TEXTURE_DATA
+#include "renderer/TextureCache.h"
 #endif
 
 #define ENABLE_GAF_MANUAL_PREMULTIPLY 0
@@ -48,7 +48,7 @@ bool GAFAssetTextureManager::isAtlasInfoPresent(const GAFTextureAtlas::AtlasInfo
 	return false;
 }
 
-void GAFAssetTextureManager::loadImages(const std::string& dir, GAFTextureLoadDelegate_t delegate, cocos2d::ZipFile* bundle)
+void GAFAssetTextureManager::loadImages(const std::string& dir, GAFTextureLoadDelegate_t delegate, ax::ZipFile* bundle)
 {
 	std::stable_sort(m_atlasInfos.begin(), m_atlasInfos.end(), GAFTextureAtlas::compareAtlasesById);
 
@@ -70,15 +70,15 @@ void GAFAssetTextureManager::loadImages(const std::string& dir, GAFTextureLoadDe
 					source = aiSource.source;
 				}
 
-				if (aiSource.csf == cocos2d::Director::getInstance()->getContentScaleFactor())
+				if (aiSource.csf == ax::Director::getInstance()->getContentScaleFactor())
 				{
 					source = aiSource.source;
 					break;
 				}
 			}
 
-			cocos2d::Image* image = new cocos2d::Image();
-			std::string path = cocos2d::FileUtils::getInstance()->fullPathFromRelativeFile(source.c_str(), dir.c_str());
+			ax::Image* image = new ax::Image();
+			std::string path = ax::FileUtils::getInstance()->fullPathFromRelativeFile(source, dir);
 
 			if (delegate)
 			{
@@ -87,22 +87,26 @@ void GAFAssetTextureManager::loadImages(const std::string& dir, GAFTextureLoadDe
 
 			if (!bundle)
 			{
-				image->initWithImageFile(path.c_str());
+				image->initWithImageFile(path);
 			}
 			else
 			{
-				ssize_t sz = 0;
-				unsigned char* imgData = bundle->getFileData(path, &sz);
-				if (!imgData || !sz)
+                ax::Data data;
+                ax::ResizableBufferAdapter buffer(&data);
+
+				if (!bundle->getFileData(path, &buffer))
 					return;
 
-				image->initWithImageData(imgData, sz);
+				if (buffer.size() == 0)
+					return;
+
+				image->initWithImageData(data.data(), data.getSize());
 			}
 
 			m_memoryConsumption += image->getDataLen();
 
 #if ENABLE_GAF_MANUAL_PREMULTIPLY
-			if (!image->isPremultipliedAlpha() && image->hasAlpha())
+			if (!image->hasPremultipliedAlpha() && image->hasAlpha())
 			{
 				//Premultiply
 				unsigned char* begin = image->getData();
@@ -113,7 +117,7 @@ void GAFAssetTextureManager::loadImages(const std::string& dir, GAFTextureLoadDe
 				for (auto data = begin; data < end; data += Bpp)
 				{
 					unsigned int* wordData = (unsigned int*)(data);
-					*wordData = CC_RGB_PREMULTIPLY_ALPHA(data[0], data[1], data[2], data[3]);
+					*wordData = AX_RGB_PREMULTIPLY_ALPHA(data[0], data[1], data[2], data[3]);
 				}
 			}
 #endif
@@ -122,7 +126,7 @@ void GAFAssetTextureManager::loadImages(const std::string& dir, GAFTextureLoadDe
 	}
 }
 
-cocos2d::Texture2D* GAFAssetTextureManager::getTextureById(uint32_t id)
+ax::Texture2D* GAFAssetTextureManager::getTextureById(uint32_t id)
 {
 	TexturesMap_t::const_iterator txIt = m_textures.find(id);
 	if (txIt != m_textures.end())
@@ -134,11 +138,11 @@ cocos2d::Texture2D* GAFAssetTextureManager::getTextureById(uint32_t id)
     ImagesMap_t::const_iterator imagesIt = m_images.find(id);
     if (imagesIt != m_images.end())
     {
-        cocos2d::Texture2D * texture = new cocos2d::Texture2D();
+        ax::Texture2D * texture = new ax::Texture2D();
         texture->initWithImage(imagesIt->second);
         m_textures[id] = texture;
-#if CC_ENABLE_CACHE_TEXTURE_DATA
-        cocos2d::VolatileTextureMgr::addImage(texture, imagesIt->second);
+#if AX_ENABLE_CACHE_TEXTURE_DATA
+        ax::VolatileTextureMgr::addImage(texture, imagesIt->second);
 #endif
         imagesIt->second->release();
         m_images.erase(imagesIt);
@@ -148,7 +152,7 @@ cocos2d::Texture2D* GAFAssetTextureManager::getTextureById(uint32_t id)
     return nullptr;
 }
 
-bool GAFAssetTextureManager::swapTexture(uint32_t id, cocos2d::Texture2D *texture)
+bool GAFAssetTextureManager::swapTexture(uint32_t id, ax::Texture2D *texture)
 {
     TexturesMap_t::const_iterator txIt = m_textures.find(id);
     if (txIt != m_textures.end())
@@ -164,9 +168,9 @@ bool GAFAssetTextureManager::swapTexture(uint32_t id, cocos2d::Texture2D *textur
         m_images.erase(imagesIt);
     }
     
-#if CC_ENABLE_CACHE_TEXTURE_DATA
-    // NOTE: this should not work with cocos2d::VolatileTextureMgr
-    //cocos2d::VolatileTextureMgr::addImage(texture, imagesIt->second);
+#if AX_ENABLE_CACHE_TEXTURE_DATA
+    // NOTE: this should not work with ax::VolatileTextureMgr
+    //ax::VolatileTextureMgr::addImage(texture, imagesIt->second);
 #endif
     
     texture->retain();

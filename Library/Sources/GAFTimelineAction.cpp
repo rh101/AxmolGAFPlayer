@@ -19,15 +19,15 @@ void GAFTimelineAction::setAction(GAFActionType type, ActionParams_t params, con
     case GAFActionType::None:
     case GAFActionType::Stop:
     case GAFActionType::Play:
-        CCASSERT(params.size() == 0, "Something wrong with action parameters");
+        AXASSERT(params.size() == 0, "Something wrong with action parameters");
         break;
     case GAFActionType::GotoAndStop:
     case GAFActionType::GotoAndPlay:
-        CCASSERT(params.size() == 1, "Something wrong with action parameters");
+        AXASSERT(params.size() == 1, "Something wrong with action parameters");
         m_params = params;
         break;
     case GAFActionType::DispatchEvent:
-        CCASSERT(params.size() > 0 && params.size() < 5, "Something wrong with action parameters");
+        AXASSERT(params.size() > 0 && params.size() < 5, "Something wrong with action parameters");
         m_params = params;
         break;
     default:

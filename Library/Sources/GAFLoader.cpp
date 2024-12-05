@@ -110,7 +110,7 @@ void GAFLoader::loadTags(GAFStream* in, GAFAsset* asset, GAFTimeline* timeline)
         {
             if (tag != Tags::TagEnd)
             {
-                CCLOG("No tag parser for %d. Custom loader needed", tag);
+                AXLOGD("No tag parser for {}. Custom loader needed", (int)tag);
             }
         }
 

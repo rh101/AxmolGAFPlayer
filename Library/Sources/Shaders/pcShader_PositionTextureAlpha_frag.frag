@@ -1,38 +1,44 @@
+#version 310 es
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple shader with added color transform
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const char* pcShader_PositionTextureAlpha_frag_fs = STRINGIFY(
-
-\n#ifdef GL_ES\n
 precision mediump float;
-\n#endif\n
 
-varying vec2 v_texCoord;
-varying vec4 v_fragmentColor;
+layout(location = COLOR0) in vec4 v_color;
+layout(location = TEXCOORD0) in vec2 v_texCoord;
 
-uniform vec4 colorTransformMult;
-uniform vec4 colorTransformOffsets;
-uniform mat4 colorMatrix;
-uniform vec4 colorMatrix2;
+layout(location = SV_Target0) out vec4 FragColor;
+
+layout(binding = 0) uniform sampler2D u_tex0;
+
+layout(std140) uniform fs_ub {
+    vec4 colorTransformMult;
+    vec4 colorTransformOffsets;
+    mat4 colorMatrix;
+    vec4 colorMatrix2;
+};
 
 void main()
 {
-    vec4 texColor = texture2D(CC_Texture0, v_texCoord);
+    vec4 texColor = texture(u_tex0, v_texCoord);
     
     const float kMinimalAlphaAllowed = 1.0e-8;
-    texColor.a = clamp(texColor.a, kMinimalAlphaAllowed, 1.0);
-    
-    texColor = vec4(texColor.rgb / texColor.a, texColor.a);
 
-    vec4 ctxColor = texColor * colorTransformMult + colorTransformOffsets;
-    vec4 adjustColor = colorMatrix * ctxColor + colorMatrix2;
-    adjustColor *= v_fragmentColor;
+    if (texColor.a > kMinimalAlphaAllowed)
+    {
+        texColor.a = clamp(texColor.a, kMinimalAlphaAllowed, 1.0);
+        texColor = vec4(texColor.rgb / texColor.a, texColor.a);
 
-    texColor = vec4(adjustColor.rgb * adjustColor.a, adjustColor.a);
+        vec4 ctxColor = texColor * colorTransformMult + colorTransformOffsets;
+        vec4 adjustColor = colorMatrix * ctxColor + colorMatrix2;
+        adjustColor *= v_color;
+
+        texColor = vec4(adjustColor.rgb * adjustColor.a, adjustColor.a);
+    }
     
-    gl_FragColor = texColor;
+    FragColor = texColor;
 }
-);

@@ -6,7 +6,7 @@
 
 NS_GAF_BEGIN
 
-GAFTimeline::GAFTimeline(GAFTimeline* parent, uint32_t id, const cocos2d::Rect& aabb, cocos2d::Point& pivot, uint32_t framesCount) :
+GAFTimeline::GAFTimeline(GAFTimeline* parent, uint32_t id, const ax::Rect& aabb, ax::Point& pivot, uint32_t framesCount) :
 m_id(id)
 , m_aabb(aabb)
 , m_pivot(pivot)
@@ -82,7 +82,7 @@ void GAFTimeline::setSceneHeight(unsigned int v)
     m_sceneHeight = v;
 }
 
-void GAFTimeline::setSceneColor(const cocos2d::Color4B& v)
+void GAFTimeline::setSceneColor(const ax::Color4B& v)
 {
     m_sceneColor = v;
 }
@@ -185,12 +185,12 @@ uint32_t GAFTimeline::getFramesCount() const
     return m_framesCount;
 }
 
-const cocos2d::Rect GAFTimeline::getRect() const
+const ax::Rect GAFTimeline::getRect() const
 {
     return m_aabb;
 }
 
-const cocos2d::Point GAFTimeline::getPivot() const
+const ax::Point GAFTimeline::getPivot() const
 {
     return m_pivot;
 }
