@@ -70,7 +70,7 @@ NS_GAF_BEGIN
                 }
                 else
                 {
-                    program = ProgramManager::getInstance()->loadProgram(positionTextureColor_vert, fragmentShader);
+                    program = ProgramManager::getInstance()->loadProgram(positionTextureColor_vert, fragmentShader, VertexLayoutType::Sprite);
                     AX_SAFE_RELEASE(s_programs[EPrograms::Alpha]);
                     s_programs[EPrograms::Alpha] = program;
                     AX_SAFE_RETAIN(s_programs[EPrograms::Alpha]);
@@ -100,7 +100,7 @@ NS_GAF_BEGIN
                 }
                 else
                 {
-                    program = ProgramManager::getInstance()->loadProgram(positionTextureColor_vert, fs);
+                    program = ProgramManager::getInstance()->loadProgram(positionTextureColor_vert, fs, VertexLayoutType::Sprite);
                     AX_SAFE_RELEASE(s_programs[EPrograms::Blur]);
                     s_programs[EPrograms::Blur] = program;
                     AX_SAFE_RETAIN(s_programs[EPrograms::Blur]);
@@ -116,7 +116,7 @@ NS_GAF_BEGIN
 
             // Glow
             {
-                auto fs = GAFShaderManager::getShader(GAFShaderManager::EFragmentShader::Glow);
+                auto fs = getShader(EFragmentShader::Glow);
                 Program* program = nullptr;
                 if (reinit)
                 {
@@ -128,7 +128,7 @@ NS_GAF_BEGIN
                 }
                 else
                 {
-                    program = ProgramManager::getInstance()->loadProgram(positionTextureColor_vert, fs);
+                    program = ProgramManager::getInstance()->loadProgram(positionTextureColor_vert, fs, VertexLayoutType::Sprite);
                     AX_SAFE_RELEASE(s_programs[EPrograms::Glow]);
                     s_programs[EPrograms::Glow] = program;
                     AX_SAFE_RETAIN(s_programs[EPrograms::Glow]);
