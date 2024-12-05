@@ -133,7 +133,7 @@ ax::Texture2D* GAFFilterManager::renderGlowTexture(ax::Sprite* sprite, GAFGlowFi
     // B
     // Draw with blur over X coordinate
     {
-        ax::Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
+        ax::Vec2 texelValue(blurRadiusX / rTextureSize.width, 0);
 
         auto* state = new (std::nothrow) ProgramState(program);
         auto texelValueLocation =
@@ -145,7 +145,7 @@ ax::Texture2D* GAFFilterManager::renderGlowTexture(ax::Sprite* sprite, GAFGlowFi
 
         state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
         state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
-        auto strength = (float)sqrt(filter->strength);
+        auto strength = sqrt(filter->strength);
         state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outA->getSprite()->getTexture());
@@ -163,7 +163,7 @@ ax::Texture2D* GAFFilterManager::renderGlowTexture(ax::Sprite* sprite, GAFGlowFi
     // C
     // Draw with blur over Y coordinate
     {
-        ax::Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
+        ax::Vec2 texelValue(0, blurRadiusY / rTextureSize.height);
 
         auto* state = new (std::nothrow) ProgramState(program);
         auto texelValueLocation =
@@ -175,7 +175,7 @@ ax::Texture2D* GAFFilterManager::renderGlowTexture(ax::Sprite* sprite, GAFGlowFi
 
         state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
         state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
-        auto strength = (float)sqrt(filter->strength);
+        auto strength = sqrt(filter->strength);
         state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outB->getSprite()->getTexture());
@@ -234,7 +234,7 @@ ax::Texture2D* GAFFilterManager::renderBlurTexture(ax::Sprite* sprite, GAFBlurFi
     // B
     // Draw with blur over X coordinate
     {
-        ax::Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
+        ax::Vec2 texelValue(blurRadiusX / rTextureSize.width, 0);
 
         auto* state = new (std::nothrow) ProgramState(program);
         auto texelValueLocation =
@@ -257,7 +257,7 @@ ax::Texture2D* GAFFilterManager::renderBlurTexture(ax::Sprite* sprite, GAFBlurFi
     // C
     // Draw with blur over Y coordinate
     {
-        ax::Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
+        ax::Vec2 texelValue(0, blurRadiusY / rTextureSize.height);
 
         auto* state = new (std::nothrow) ProgramState(program);
         auto texelValueLocation =
@@ -314,16 +314,20 @@ ax::Texture2D* GAFFilterManager::renderShadowTexture(ax::Sprite* sprite, GAFDrop
     // B
     // Draw with blur over X coordinate
     {
-        Vec2 texelValue(blurRadiusX / (GLfloat)rTextureSize.width, 0);
+        Vec2 texelValue(blurRadiusX / rTextureSize.width, 0);
 
         auto* state = new (std::nothrow) ProgramState(program);
         auto texelValueLocation =
             getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowTexelOffset));
         auto glowColorLocation =
             getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowColor));
+        auto strengthLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::Strength));
 
         state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
         state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
+        auto strength = 1.f;
+        state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outA->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
@@ -340,16 +344,20 @@ ax::Texture2D* GAFFilterManager::renderShadowTexture(ax::Sprite* sprite, GAFDrop
     // C
     // Draw with blur over Y coordinate
     {
-        Vec2 texelValue(0, blurRadiusY / (GLfloat)rTextureSize.height);
+        Vec2 texelValue(0, blurRadiusY / rTextureSize.height);
 
         auto* state = new (std::nothrow) ProgramState(program);
         auto texelValueLocation =
             getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowTexelOffset));
         auto glowColorLocation =
             getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::GlowColor));
+        auto strengthLocation =
+            getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::Strength));
 
         state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
         state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
+        auto strength = 1.f;
+        state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outB->getSprite()->getTexture());
         s->setPosition(rTextureSize.width / 2, rTextureSize.height / 2);
