@@ -39,8 +39,8 @@ public:
 
     virtual bool initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect, bool rotated) override;
 
-    void setColorTransform(const GLfloat * mults, const GLfloat * offsets);
-    void setColorTransform(const GLfloat * colorTransform);
+    void setColorTransform(const float * mults, const float * offsets);
+    void setColorTransform(const float * colorTransform);
 
     void setColorMarixFilterData(GAFColorMatrixFilterData* data);
     void setGlowFilterData(GAFGlowFilterData* data);

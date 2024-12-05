@@ -184,7 +184,7 @@ public:
     virtual ax::AffineTransform getNodeToParentAffineTransform() const override;
 
     virtual void setColor(const ax::Color3B& color) override;
-    virtual void setOpacity(GLubyte opacity) override;
+    virtual void setOpacity(uint8_t opacity) override;
 
     template <typename FilterSubtype>
     void setCustomFilter(const FilterSubtype* filter)

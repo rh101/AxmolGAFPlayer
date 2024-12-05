@@ -26,9 +26,8 @@ const float GAFColorMatrixFilterData::Grayscale::matrix[16] = {
 const float GAFColorMatrixFilterData::Grayscale::matrix2[4] = { 0, 0, 0, 0 };
 
 GAFColorMatrixFilterData::GAFColorMatrixFilterData() :
-GAFFilterData(GAFFilterType::ColorMatrix)
+	GAFFilterData(GAFFilterType::ColorMatrix), matrix{}, matrix2{}
 {
-
 }
 
 void GAFColorMatrixFilterData::setMatrix(const float m[16])
@@ -47,9 +46,8 @@ void GAFColorMatrixFilterData::apply(GAFMovieClip* subObject)
 }
 
 GAFGlowFilterData::GAFGlowFilterData():
-GAFFilterData(GAFFilterType::Glow)
+	GAFFilterData(GAFFilterType::Glow), strength(0), innerGlow(false), knockout(false)
 {
-
 }
 
 void GAFGlowFilterData::apply(GAFMovieClip* subObject)
@@ -58,9 +56,8 @@ void GAFGlowFilterData::apply(GAFMovieClip* subObject)
 }
 
 GAFDropShadowFilterData::GAFDropShadowFilterData():
-GAFFilterData(GAFFilterType::DropShadow)
+	GAFFilterData(GAFFilterType::DropShadow), angle(0), distance(0), strength(0), innerShadow(false), knockout(false)
 {
-
 }
 
 const int kShadowObjectTag = 0xFAD0;
@@ -74,10 +71,10 @@ void GAFDropShadowFilterData::apply(GAFMovieClip* subObject)
     reset(subObject);
 
     shadowSprite->setTag(kShadowObjectTag);
-    shadowSprite->setOpacity(static_cast<GLubyte>(ax::clampf(strength, 0.0, 1.0) * 255));
+    shadowSprite->setOpacity(static_cast<uint8_t>(ax::clampf(strength, 0.0, 1.0) * 255));
 
     const float anglerad = ((float)M_PI / 180.f) * angle;
-    ax::Size shadowTextureSize = shadowSprite->getContentSize();
+    //ax::Size shadowTextureSize = shadowSprite->getContentSize();
     ax::Vec2 offset = ax::Vec2(cos(anglerad) * distance, -sin(anglerad) * distance);
     shadowSprite->setPosition(ax::Vec2(texRect.size / 2) + offset);
     subObject->addChild(shadowSprite, -1);

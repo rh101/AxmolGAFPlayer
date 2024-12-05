@@ -769,7 +769,7 @@ void GAFObject::setColor(const ax::Color3B& color)
     Node::setColor(color);
 }
 
-void GAFObject::setOpacity(GLubyte opacity)
+void GAFObject::setOpacity(uint8_t opacity)
 {
     m_isManualColor = true;
     Node::setOpacity(opacity);
@@ -895,11 +895,11 @@ void GAFObject::realizeFrame(ax::Node* out, uint32_t frameIndex)
                 {
                     filter = m_customFilter;
                 }
-                else if (m_parentFilters.size() > 0)
+                else if (!m_parentFilters.empty())
                 {
                     filter = *m_parentFilters.begin();
                 }
-                else if (filters.size() > 0)
+                else if (!filters.empty())
                 {
                     filter = *filters.begin();
                 }

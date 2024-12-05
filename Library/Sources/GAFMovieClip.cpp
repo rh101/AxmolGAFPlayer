@@ -177,7 +177,7 @@ uint32_t GAFMovieClip::setUniforms()
     {
         Color4F color(m_colorTransformMult.x, m_colorTransformMult.y, m_colorTransformMult.z, m_colorTransformMult.w);
         Node::setColor(Color3B(color));
-        Node::setOpacity(static_cast<GLubyte>(color.a * 255.0f));
+        Node::setOpacity(static_cast<uint8_t>(color.a * 255.0f));
     }
     else
     {
@@ -214,7 +214,7 @@ uint32_t GAFMovieClip::setUniforms()
     }
     return XXH32((void*)&hash, sizeof(GAFMovieClipHash), 0);
 }
-void GAFMovieClip::setColorTransform(const GLfloat * mults, const GLfloat * offsets)
+void GAFMovieClip::setColorTransform(const float * mults, const float * offsets)
 {
     if (m_isStencil)
     {
@@ -226,7 +226,7 @@ void GAFMovieClip::setColorTransform(const GLfloat * mults, const GLfloat * offs
     m_ctxDirty = true;
 }
 
-void GAFMovieClip::setColorTransform(const GLfloat * colorTransform)
+void GAFMovieClip::setColorTransform(const float * colorTransform)
 {
     if (m_isStencil)
     {
