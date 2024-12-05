@@ -16,7 +16,7 @@ NS_GAF_BEGIN
 
 struct GAFMovieClipHash
 {
-    int     program;
+    Program*   program;
     Texture2D* texture;
     BlendFunc blend;
     Vec4    a;
@@ -61,14 +61,12 @@ bool GAFMovieClip::initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect
         m_colorTransformOffsets = ax::Vec4::ZERO;
         _setBlendingFunc();
 
-        //m_programBase = ProgramManager::getInstance()->loadProgram(ax::positionTextureColor_vert, filePath);
         m_programBase = new ProgramState(GAFShaderManager::getProgram(GAFShaderManager::EPrograms::Alpha));
-        //m_programBase->retain();
+
 #if CHECK_CTX_IDENTITY
         auto p = ProgramManager::getInstance()->getBuiltinProgram(ax::backend::ProgramType::POSITION_TEXTURE_COLOR);
         AXASSERT(p, "Error! Program SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP not found.");
         m_programNoCtx = new backend::ProgramState(p);
-        //m_programNoCtx->retain();
 #endif
 #if CHECK_CTX_IDENTITY
         _programState = m_programNoCtx;
@@ -101,7 +99,17 @@ bool GAFMovieClip::initWithTexture(ax::Texture2D *pTexture, const ax::Rect& rect
 
 bool GAFMovieClip::setProgramState(ax::ProgramState* programState, bool ownPS)
 {
-    return GAFObject::setProgramState(programState, ownPS);
+    if (_programState == nullptr || (_programState && _programState->getProgram() != programState->getProgram()))
+    {
+        auto alphaTest = ProgramManager::getInstance()->getBuiltinProgram(backend::ProgramType::POSITION_TEXTURE_COLOR_ALPHA_TEST);
+
+        if (programState->getProgram() == alphaTest)
+        {
+            // This node is set as stencil
+            handleStencilProgram();
+        }
+    }
+    return GAFSprite::setProgramState(programState, ownPS);
 }
 
 void GAFMovieClip::handleStencilProgram()
@@ -148,11 +156,6 @@ uint32_t GAFMovieClip::setUniforms()
         return GAFSprite::setUniforms();
     }
 
-//#if GAF_ENABLE_NEW_UNIFORM_SETTER
-//#define getUniformId(x) GAFShaderManager::getUniformLocation(x)
-//#else
-//#define getUniformId(x) GAFShaderManager::getUniformName(x)
-//#endif
 #define getUniformId(ps, x) (ps)->getUniformLocation(x)
 
 #if CHECK_CTX_IDENTITY
@@ -166,10 +169,9 @@ uint32_t GAFMovieClip::setUniforms()
     GAFMovieClipHash hash;
     memset(&hash, 0, sizeof(GAFMovieClipHash));
 
-    hash.program = state->getProgram()->getProgramId();
+    hash.program = state->getProgram();
     hash.texture = _texture;
     hash.blend = _blendFunc;
-
 
     if (!ctx)
     {
@@ -182,33 +184,32 @@ uint32_t GAFMovieClip::setUniforms()
         {
             hash.a = m_colorTransformMult;
             hash.b = m_colorTransformOffsets;
-            state->setUniform(getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorTransformMult)),
-                              &m_colorTransformMult, sizeof(ax::Vec4));
-            state->setUniform(getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorTransformOffset)),
-                              &m_colorTransformOffsets, sizeof(ax::Vec4));
+            const auto colorTransformMultLocation = getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorTransformMult));
+            const auto colorTransformOffsetLocation = getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorTransformOffset));
+
+            state->setUniform(colorTransformMultLocation, &m_colorTransformMult, sizeof(ax::Vec4));
+            state->setUniform(colorTransformOffsetLocation, &m_colorTransformOffsets, sizeof(ax::Vec4));
         }
 
         if (!m_colorMatrixFilterData)
         {
             hash.d = ax::Mat4::IDENTITY;
             hash.e = ax::Vec4::ZERO;
-            state->setUniform(
-                getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixBody)),
-                &ax::Mat4::IDENTITY, sizeof(ax::Mat4));
-            state->setUniform(
-                getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixAppendix)),
-                &ax::Vec4::ZERO, sizeof(ax::Vec4));
+            const auto colorMatrixBodyLocation = getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixBody));
+            const auto colorMatrixAppendixLocation = getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixAppendix));
+
+        	state->setUniform(colorMatrixBodyLocation, &ax::Mat4::IDENTITY, sizeof(ax::Mat4));
+            state->setUniform(colorMatrixAppendixLocation, &ax::Vec4::ZERO, sizeof(ax::Vec4));
         }
         else
         {
             hash.d = Mat4(m_colorMatrixFilterData->matrix);
             hash.e = Vec4(m_colorMatrixFilterData->matrix2);
-            state->setUniform(
-                getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixBody)),
-                &m_colorMatrixFilterData->matrix, sizeof(ax::Mat4));
-            state->setUniform(
-                getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixAppendix)),
-                &m_colorMatrixFilterData->matrix2, sizeof(ax::Vec4));
+            const auto colorMatrixBodyLocation = getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixBody));
+            const auto colorMatrixAppendixLocation = getUniformId(state, GAFShaderManager::getUniformName(GAFShaderManager::EUniforms::ColorMatrixAppendix));
+
+            state->setUniform(colorMatrixBodyLocation, &m_colorMatrixFilterData->matrix, sizeof(m_colorMatrixFilterData->matrix));
+            state->setUniform(colorMatrixAppendixLocation, &m_colorMatrixFilterData->matrix2, sizeof(m_colorMatrixFilterData->matrix2));
         }
     }
     return XXH32((void*)&hash, sizeof(GAFMovieClipHash), 0);
