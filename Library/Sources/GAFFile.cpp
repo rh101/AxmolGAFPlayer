@@ -17,10 +17,9 @@ void GAFFile::_readHeaderBegin(GAFHeader& out)
     out.fileLenght = read4Bytes();
 }
 
-GAFFile::GAFFile() : 
-m_data(nullptr)
+GAFFile::GAFFile() :
+	m_data(nullptr), m_dataPosition(0), m_dataLen(0), m_header()
 {
-
 }
 
 GAFFile::~GAFFile()
@@ -129,7 +128,7 @@ bool GAFFile::open(const unsigned char* data, size_t len)
     close();
 
     m_data = const_cast<unsigned char*>(data);
-    m_dataLen = len;
+    m_dataLen = static_cast<unsigned long>(len);
 
     if (m_data)
     {
@@ -139,13 +138,20 @@ bool GAFFile::open(const unsigned char* data, size_t len)
     return false;
 }
 
-bool GAFFile::open(const std::string& filePath, const char* openMode)
+bool GAFFile::open(const std::string& filePath)
 {
     close();
 
-    m_data = _getData(filePath, openMode, m_dataLen);
+    auto fileData = _getData(filePath);
 
-    if (m_data)
+    ssize_t dataSize;
+    m_data = fileData.takeBuffer(&dataSize);
+    if (dataSize > -1)
+    {
+        m_dataLen = static_cast<unsigned long>(dataSize);
+    }
+
+    if (m_data && m_dataLen > 0)
     {
         return _processOpen();
     }
@@ -155,7 +161,7 @@ bool GAFFile::open(const std::string& filePath, const char* openMode)
 
 bool GAFFile::isOpened() const
 {
-    return m_data != NULL;
+    return m_data != nullptr;
 }
 
 const GAFHeader& GAFFile::getHeader() const
@@ -178,47 +184,18 @@ void GAFFile::rewind(unsigned int newPos)
     m_dataPosition = newPos;
 }
 
-unsigned char* GAFFile::_getData(const std::string& filename, const char* openMode, unsigned long& outLen)
+ax::Data GAFFile::_getData(const std::string& filename)
 {
     assert(!(filename.empty()));
 
-    unsigned char* ret = nullptr;
-    outLen = 0;
-    ssize_t size = 0;
-    //const char* mode = nullptr;
+    auto fileData = ax::FileUtils::getInstance()->getDataFromFile(filename);
 
-#ifdef ANDROID
-    ret = ax::FileUtilsAndroid::getInstance()->getFileData(filename, openMode, &size);
-#else
-    do
+    if (fileData.isNull() || 0 == fileData.size() )
     {
-        // Read the file from hardware
-        std::string fullPath = ax::FileUtils::getInstance()->fullPathForFilename(filename);
-        FILE *fp = fopen(fullPath.c_str(), openMode);
-        AX_BREAK_IF(!fp);
-        fseek(fp, 0, SEEK_END);
-        size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-        
-        ret  = new unsigned char[size];
-
-        size = fread(ret, sizeof(unsigned char), size, fp);
-        fclose(fp);
-    } while (0);
-#endif
-
-    if (nullptr == ret || 0 == size)
-    {
-        std::string msg = "Get data from file(";
-        msg.append(filename).append(") failed!");
-        AXLOGD("{}", msg);
-    }
-    else
-    {
-        outLen = size;
+        AXLOGE("Get data from file({}) failed!", filename);
     }
 
-    return ret;
+    return fileData;
 }
 
 bool GAFFile::_processOpen()

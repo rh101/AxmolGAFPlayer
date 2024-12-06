@@ -184,7 +184,7 @@ bool GAFLoader::loadFile(const std::string& fname, GAFAsset* context)
 
     bool retval = false;
 
-    if (file->open(fname, "rb"))
+    if (file->open(fname))
     {
         retval = true;
 

@@ -12,7 +12,7 @@ private:
     unsigned long         m_dataLen;
     GAFHeader             m_header;
 private:
-    unsigned char*       _getData(const std::string& filename, const char* openMode, unsigned long& outLen);
+    ax::Data             _getData(const std::string& filename);
     bool                 _processOpen();
 protected:
     void                 _readHeaderBegin(GAFHeader&);
@@ -35,7 +35,7 @@ public:
     void                 close();
 
     // TODO: Provide error codes
-    bool                 open(const std::string& filename, const char* openMode);
+    bool                 open(const std::string& filename);
     bool                 open(const unsigned char* data, size_t len);
 
     bool                 isOpened() const;
