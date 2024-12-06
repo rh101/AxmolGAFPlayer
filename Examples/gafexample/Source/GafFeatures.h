@@ -27,7 +27,7 @@ private:
 
     typedef std::vector<std::string> StringVector_t;
     typedef std::unordered_map<int, std::string> MusicEffects_t;
-    
+
     GAFAsset*                m_asset;
     ax::Vector<GAFObject*>   m_objects;
     StringVector_t           m_files;
@@ -41,14 +41,14 @@ private:
 
     ax::Label* m_loadingTimeLabel;
     ax::EventListenerTouchAllAtOnce* m_touchlistener;
-    
+
     ax::MenuItemImage* m_playButton;
     ax::MenuItemImage* m_pauseButton;
     ax::MenuItemImage* m_nextSequence;
     ax::MenuItemImage* m_prevSequence;
     ax::Label*         m_sequenceName;
     ax::Label*         m_vramStat;
-    
+
     void setupMenuItems();
     ax::MenuItemImage* addButton(const std::string& buttonName,
                                  const std::string& buttonPressedName,
@@ -100,8 +100,6 @@ public:
 
     virtual void onFinishSequence(GAFObject* object, const std::string& sequenceName);
 
-    virtual void onTexturePreLoad(std::string* path);
-    
     virtual void onFramePlayed(GAFObject* object, uint32_t frame);
 
     virtual void onSoundEvent(GAFSoundInfo* sound, int32_t repeat, GAFSoundInfo::SyncEvent syncEvent);

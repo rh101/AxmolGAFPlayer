@@ -137,11 +137,11 @@ void GafFeatures::setupMenuItems()
 {
     ax::Size wsize = ax::Director::getInstance()->getWinSize();
     ax::Vector<ax::MenuItem*> items;
-    
+
     using namespace std::placeholders;
-    
+
     const float Y = 0.1f;
-    
+
     items.pushBack(addButton("buttons/previous_animation_button@2x.png", "buttons/previous_animation_button_pressed@2x.png", ax::Point(0.0f, Y),
                              [this](ax::Object* obj)
                              {
@@ -149,10 +149,10 @@ void GafFeatures::setupMenuItems()
                                  m_playButton->setVisible(false);
                                  m_pauseButton->setVisible(true);
                              }));
-    
-                   
+
+
     items.pushBack(addButton("buttons/previous_frame_button@2x.png", "buttons/previous_frame_button_pressed@2x.png", ax::Point(0.1f, Y), std::bind(&GafFeatures::prevFrame, this, _1)));
-    
+
     m_playButton = addButton("buttons/play_button@2x.png", "buttons/play_button_pressed@2x.png", ax::Point(0.22f, Y),
                              [this](ax::Object* obj)
                              {
@@ -160,7 +160,7 @@ void GafFeatures::setupMenuItems()
                                  m_pauseButton->setVisible(false);
                                  this->playpause(obj);
                              });
-    
+
     m_pauseButton = addButton("buttons/pause_button@2x.png", "buttons/pause_button_pressed@2x.png", ax::Point(0.22f, Y),
                               [this](ax::Object* obj)
                               {
@@ -168,9 +168,9 @@ void GafFeatures::setupMenuItems()
                                   m_playButton->setVisible(true);
                                   this->playpause(obj);
                               });
-    
+
     items.pushBack(addButton("buttons/next_frame_button@2x.png", "buttons/next_frame_button_pressed@2x.png", ax::Point(0.34f, Y), std::bind(&GafFeatures::nextFrame, this, _1)));
-    
+
     items.pushBack(addButton("buttons/next_animation_button@2x.png", "buttons/next_animation_button_pressed@2x.png", ax::Point(0.44f, Y),
                              [this](ax::Object* obj)
                              {
@@ -179,15 +179,15 @@ void GafFeatures::setupMenuItems()
 
                                  GafFeatures::next_anim(obj);
                              }));
-    
+
     items.pushBack(addButton("buttons/restart_button@2x.png", "buttons/restart_button_pressed@2x.png", ax::Point(0.57f, Y), std::bind(&GafFeatures::restart, this, _1)));
-    
+
     items.pushBack(addButton("buttons/white_bg_button@2x.png", "buttons/white_bg_button_pressed@2x.png", ax::Point(0.67f, Y),
                              [this](ax::Object* ob)
                              {
                                  static int mode = 0;
                                  mode ++;
-                                 
+
                                  if (mode == 3) mode = 0;
                                  switch (mode)
                                  {
@@ -205,25 +205,25 @@ void GafFeatures::setupMenuItems()
                                  }
                              }
                              ));
-    
+
     m_nextSequence = addButton("buttons/right_arrow@2x.png", "buttons/right_arrow_pressed@2x.png", ax::Point(0.40f, 0.93f), std::bind(&GafFeatures::nextSequence, this, _1));
-    
+
     m_prevSequence = addButton("buttons/left_arrow@2x.png", "buttons/left_arrow_pressed@2x.png", ax::Point(0.05f, 0.93f), std::bind(&GafFeatures::prevSequence, this, _1));
-    
+
     m_playButton->retain();
     m_pauseButton->retain();
     m_nextSequence->retain();
     m_prevSequence->retain();
-    
+
     m_playButton->setVisible(false);
     items.pushBack(m_pauseButton);
     items.pushBack(m_playButton);
     items.pushBack(m_nextSequence);
     items.pushBack(m_prevSequence);
-    
+
     m_sequenceName = ax::Label::createWithSystemFont("---", "System", 24);
     m_sequenceName->retain();
-    
+
     ax::Menu* pMenu = ax::Menu::createWithArray(items);
 
     pMenu->setPosition(ax::Point(wsize.width / 2.f - m_pauseButton->getPositionX(), 0));
@@ -232,35 +232,35 @@ void GafFeatures::setupMenuItems()
     labelMenuItem->setAnchorPoint(ax::Vec2(0.f, 0.5f));
     ax::Point labelPos = ax::Point( m_prevSequence->getPositionX() + m_prevSequence->getContentSize().width / 2.f, m_prevSequence->getPositionY());
     labelMenuItem->setPosition(labelPos);
-    
+
     pMenu->addChild(labelMenuItem);
-    
+
     addChild(pMenu, 10000);
-    
+
     ax::Sprite* gafLogo = ax::Sprite::create("buttons/gaf_logo@2x.png");
     gafLogo->setAnchorPoint(ax::Point(1.f, 1.f));
     gafLogo->setScale(0.5f * ax::Director::getInstance()->getContentScaleFactor());
     gafLogo->setPosition(ax::Vec2(wsize.width * 0.93f, wsize.height * 0.93f));
-    
+
     addChild(gafLogo, 10000);
-    
+
     m_vramStat = ax::Label::createWithSystemFont("VRAM: XXX", "System", 14);
     m_vramStat->setAnchorPoint(ax::Point(0.f, 0.f));
     m_vramStat->setPosition(ax::Vec2(10, wsize.height * 0.1f));
     m_vramStat->retain();
-    
+
     addChild(m_vramStat);
 }
 
 ax::MenuItemImage* GafFeatures::addButton(const std::string &buttonName, const std::string &buttonPressedName, const ax::Point &pos, const ax::ccMenuCallback& clb)
 {
     ax::Size size = ax::Director::getInstance()->getWinSize();
-    
+
     ax::MenuItemImage* item = ax::MenuItemImage::create(buttonName, buttonPressedName, "", clb);
-    
+
     item->setPosition(ax::Point(size.width * pos.x, size.height * pos.y));
     item->setScale(ax::Director::getInstance()->getContentScaleFactor());
-    
+
     return item;
 }
 
@@ -268,13 +268,13 @@ bool GafFeatures::init()
 {
     setupMenuItems();
     gray(nullptr);
-    
+
     generateGafFilesList();
-    
+
     m_anim_index = 0;
-    
+
     addObjectsToScene();
-    
+
     return true;
 }
 
@@ -326,7 +326,7 @@ void GafFeatures::searchGafFilesInDirectory(std::string& path)
             if (wfd.cFileName[0] != '.')
             {
                 std::wstring temp = wpath + wfd.cFileName;
-                
+
                 if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     temp += '/';
@@ -361,7 +361,7 @@ void GafFeatures::searchGafFilesInDirectory(std::string& path)
     const char* gaf_extension = ".gaf";
 
     DIR* directory = opendir(path.c_str());
-    
+
     if (directory)
     {
         struct dirent* hFile;
@@ -371,10 +371,10 @@ void GafFeatures::searchGafFilesInDirectory(std::string& path)
             {
                 continue;
             }
-            
+
             std::string child_entry = path + "/";
             child_entry.append(hFile->d_name);
-            
+
             if (hFile->d_type == DT_DIR)
             {
                 searchGafFilesInDirectory(child_entry);
@@ -386,7 +386,7 @@ void GafFeatures::searchGafFilesInDirectory(std::string& path)
         }
         closedir(directory);
     }
-    
+
 }
 #endif // __APPLE__
 #endif // SEARCH_ALL_GAF_FILES
@@ -396,7 +396,7 @@ void GafFeatures::enableSequenceControllers( bool value )
     m_prevSequence->setVisible(value);
     m_nextSequence->setVisible(value);
     m_sequenceName->setVisible(value);
-    
+
     if (value)
     {
         m_sequenceName->setString(m_objectSequencesNames[m_currentSequence]);
@@ -430,9 +430,9 @@ void GafFeatures::nextSequence( ax::Object* )
         m_currentSequence = 0;
     }
 
-    const char* secName = m_objectSequencesNames[m_currentSequence].c_str();
+    const auto secName = m_objectSequencesNames[m_currentSequence];
     object->playSequence(secName, true);
-    
+
     m_sequenceName->setString(secName);
 }
 
@@ -450,9 +450,9 @@ void GafFeatures::prevSequence( ax::Object* )
         m_currentSequence = m_objectSequencesNames.size() - 1;
     }
 
-    const char* secName = m_objectSequencesNames[m_currentSequence].c_str();
+    const auto secName = m_objectSequencesNames[m_currentSequence];
     object->playSequence(secName, true);
-    
+
     m_sequenceName->setString(secName);
 }
 
@@ -540,7 +540,7 @@ void GafFeatures::setFrameNumber(int aFrameNumber)
     }
 
     GAFObject *object = m_objects.at(0);
-    object->setFrame(aFrameNumber);	
+    object->setFrame(aFrameNumber);
 }
 
 int GafFeatures::frameNumber()
@@ -597,7 +597,7 @@ void GafFeatures::removeFromScene(ssize_t aCount)
 void GafFeatures::addObjectsToScene()
 {
     using namespace std::placeholders;
-    
+
     if (!m_asset)
     {
         StartCounter();
@@ -611,15 +611,15 @@ void GafFeatures::addObjectsToScene()
         ss << loadingTime;
 
         //m_loadingTimeLabel->setString(ss.str().c_str());
-        
+
         ss.str("");
-        
+
 		ss << "VRAM: ";
         ss << m_asset->getTextureManager()->getMemoryConsumptionStat();
         ss << " bytes";
-        
+
         m_vramStat->setString(ss.str());
-        
+
         AX_SAFE_RETAIN(m_asset);
     }
 
@@ -629,28 +629,28 @@ void GafFeatures::addObjectsToScene()
     {
         m_asset->setSoundDelegate(std::bind(&GafFeatures::onSoundEvent, this, _1, _2, _3));
         GAFObject *object = m_asset->createObject();
-        
+
         object->setLocalZOrder(0);
         addChild(object);
-        
+
         float scaleFactor = ax::Director::getInstance()->getContentScaleFactor();
         object->setAnchorPoint(ax::Vec2(0.5, 0.5));
         object->setPosition(centerScreenPosition(size / scaleFactor));
         object->setLocator(true);
-        
+
         m_objects.pushBack(object);
-        
+
         m_objectSequencesNames.clear();
 #if AX_TARGET_PLATFORM == AX_PLATFORM_IOS
         AudioEngine::stopAll();
-        
+
         for(auto& effect : m_musicEffects)
         {
             AudioEngine::uncache(effect.second);
         }
 #endif
         m_musicEffects.clear();
-        
+
         const AnimationSequences_t& secDictionary = m_asset->getRootTimeline()->getAnimationSequences(); // TODO: only root timeline (temporary workaround)
         if (!secDictionary.empty())
         {
@@ -672,14 +672,14 @@ void GafFeatures::addObjectsToScene()
                 }
             }
         }
-        
+
         enableSequenceControllers(!m_objectSequencesNames.empty());
-        
+
         // will work only if animation has a sequence
         object->playSequence("walk", true);
         object->setLooped(true, true);
         object->start();
-        
+
         object->setSequenceDelegate(std::bind(&GafFeatures::onFinishSequence, this, _1, _2));
         object->setFramePlayedDelegate(std::bind(&GafFeatures::onFramePlayed, this, _1, _2));
     }
@@ -693,19 +693,13 @@ void GafFeatures::onFinishSequence( GAFObject * object, const std::string& seque
 void GafFeatures::onFramePlayed(GAFObject *object, uint32_t frame)
 {
     MusicEffects_t::const_iterator it = m_musicEffects.find(frame);
-    
+
     if (it != m_musicEffects.end())
     {
 #if AX_TARGET_PLATFORM == AX_PLATFORM_IOS
         AudioEngine::play2D(it->second);
 #endif
     }
-}
-
-//! path parameter could be changed
-void GafFeatures::onTexturePreLoad(std::string* path)
-{
-    AXLOG("Loading texture {}", *path);
 }
 
 void GafFeatures::onSoundEvent(GAFSoundInfo* sound, int32_t repeat, GAFSoundInfo::SyncEvent syncEvent)
