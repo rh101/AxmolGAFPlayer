@@ -20,7 +20,6 @@ const lowp int GAUSSIAN_SAMPLES = 9;
 
 void main()
 {
-
 	vec4 sum = vec4(0.0);
 
     sum += texture(u_tex0, v_texCoord - u_step * 4.0).a * 0.05;

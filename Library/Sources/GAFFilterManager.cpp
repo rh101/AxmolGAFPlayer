@@ -326,7 +326,7 @@ ax::Texture2D* GAFFilterManager::renderShadowTexture(ax::Sprite* sprite, GAFDrop
 
         state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
         state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
-        auto strength = 1.f;
+        auto strength = sqrt(filter->strength);
         state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outA->getSprite()->getTexture());
@@ -356,7 +356,7 @@ ax::Texture2D* GAFFilterManager::renderShadowTexture(ax::Sprite* sprite, GAFDrop
 
         state->setUniform(texelValueLocation, &texelValue, sizeof(Vec2));
         state->setUniform(glowColorLocation, &filter->color, sizeof(Color4F));
-        auto strength = 1.f;
+        auto strength = sqrt(filter->strength);
         state->setUniform(strengthLocation, &strength, sizeof(float));
 
         Sprite* s = Sprite::createWithTexture(outB->getSprite()->getTexture());
