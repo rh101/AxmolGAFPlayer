@@ -87,10 +87,10 @@ bool AppDelegate::applicationDidFinishLaunching()
     // this can make sure that the resource's height could fit for the height of design resolution.
 
     // if the frame's height is larger than the height of medium resource size, select large resource.
-    //if (frameSize.height > 768)
-    //{
-    //    director->setContentScaleFactor(1);
-    //}
+    if (frameSize.height > 768)
+    {
+        director->setContentScaleFactor(2);
+    }
 
     // create a scene. it's an autorelease object
     auto scene = GafFeatures::scene();
